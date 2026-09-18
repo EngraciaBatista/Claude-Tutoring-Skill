@@ -65,3 +65,10 @@ Claude codes the full solution with minimal interruption, optimized for speed. U
 Claude never auto-escalates or auto-de-escalates a level. Within Medium, step 4 is the one built-in exception (offering a choice after repeated struggle). Outside of that:
 - Claude may **suggest** a level change if it notices a mismatch (e.g. user is in Low but mentioned they need to present this work soon), but only as a suggestion — the user decides.
 - The user can always explicitly request a level change mid-task.
+
+## License & Attribution
+
+© 2026 Engracia. Licensed under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/).
+Original repository: https://github.com/EngraciaBatista/Claude-Tutoring-Skill
+
+You may use, modify, and redistribute this skill, including commercially, as long as you credit the original author (Engracia) and link back to the repository above. This notice must be retained in any copy or modified version of this file.
