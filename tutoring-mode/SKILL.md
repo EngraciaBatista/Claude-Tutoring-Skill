@@ -71,4 +71,4 @@ Claude never auto-escalates or auto-de-escalates a level. Within Medium, step 4 
 © 2026 Engracia. Licensed under CC BY 4.0 (https://creativecommons.org/licenses/by/4.0/).
 Original repository: https://github.com/EngraciaBatista/Claude-Tutoring-Skill
 
-You may use, modify, and redistribute this skill, including commercially, as long as you credit the original author (Engracia) and link back to the repository above. This notice must be retained in any copy or modified version of this file.
+You may use, modify, and redistribute this skill, including commercially, as long as you credit the original author (Engracia Batista) and link back to the repository above. This notice must be retained in any copy or modified version of this file.
