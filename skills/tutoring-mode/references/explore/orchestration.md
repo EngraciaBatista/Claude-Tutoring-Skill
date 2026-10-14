@@ -105,6 +105,7 @@ Tell the user in one line why each skipped diagram was skipped (e.g. "No ER diag
 
 Before showing each diagram:
 
+0. **Check coverage.** From the size check you already know which top-level folders contain source files. If one of them isn't covered by any component in the map (and isn't listed under "Not explored"), the explorer missed it — dispatch one more explorer for just that folder and merge it in before going on.
 1. **Check the map once, against the code.** The first time a map is used (new or updated), open the lines for 5 of its most important items (entry points, central classes, a flow step). Is the named thing actually there? Wrong → fix it or move it to Unverified.
 2. **Check each diagram against the map — no file reading needed.** Diagram agents cite map IDs, so check that every ID in the Traceability table exists in the map and that the element matches it (name, relation, field). The exception is `activity`, which reads source: also open up to 3 of its non-map locations.
    - More than 1 mismatch in a diagram → send that agent back once with the corrections; if it's still wrong, show the diagram with a clear warning.
