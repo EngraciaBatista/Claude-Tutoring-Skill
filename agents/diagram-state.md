@@ -29,7 +29,7 @@ The prompt gives you:
 - **Transitions:** `Placed --> Paid : payment succeeds` — the label is the event or condition, in plain words.
 - Use composite states (`state Shipping { … }`) only if the code has nested states.
 - Include error/cancel transitions when the code has them — learners need to see the unhappy paths too.
-- If nearly every state can reach every other (e.g. navigation tabs), don't draw every arrow — draw one arrow into each state labeled "from any screen: <event>" and say so in "How to read it".
+- If nearly every state can reach every other (e.g. navigation tabs), don't draw every arrow — add a choice hub (`state Pick <<choice>>`), draw one arrow from each state into the hub (`teams --> Pick : click a tab`) and one arrow from the hub to each state labeled with its event (`Pick --> players : View Players`), and explain the hub in "How to read it".
 
 ## Mermaid syntax rules (keep it renderable everywhere)
 
