@@ -1,0 +1,16 @@
+{
+  "name": "engracia-tutoring",
+  "owner": {
+    "name": "Engracia Batista"
+  },
+  "metadata": {
+    "description": "Claude tutoring skills by Engracia Batista."
+  },
+  "plugins": [
+    {
+      "name": "tutoring-mode",
+      "source": "./",
+      "description": "Structured coding tutor: learn by building, or explore an existing codebase through reports, UML diagrams, and guided tours."
+    }
+  ]
+}
