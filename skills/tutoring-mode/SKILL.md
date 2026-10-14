@@ -45,6 +45,15 @@ Read only the file for the level in use:
 - **Medium** — [references/build/medium.md](references/build/medium.md)
 - **Low** — [references/build/low.md](references/build/low.md)
 
+**Every level — keep the session lean.** Build sessions get expensive by growing, since every turn re-reads the whole conversation. So:
+
+1. **Finding code (in this order):**
+   - **Use the explore map if there is one.** If `.tutoring/explore/map.md` exists, use its locations instead of searching. Check with `git diff --name-only <map commit> HEAD` which files changed since; re-read only those.
+   - **Otherwise send `code-locator`** (if installed) with the question ("where is login handled?", "where would a new endpoint go?") and any map locations you have. It returns file:line locations only, so the search itself never enters this conversation.
+   - **Otherwise search narrowly yourself:** Grep first, then read only the line ranges you need.
+2. **Let tools check the code.** After the user writes code (High) or after each unit (Medium), run the project's relevant tests and linter if it has them, and review with their results instead of reasoning through every line by hand.
+3. **Compact at boundaries.** Keep the subtask/unit checklist as the running state. When a session gets long, suggest `/compact` (Claude Code) at a subtask or unit boundary — never mid-explanation — and carry the checklist and the files touched forward.
+
 ## Explore mode
 
 Explore never edits, creates, or deletes the user's source files. The only thing it may ever write is the saved report in `.tutoring/explore/`, and only after the user says yes.

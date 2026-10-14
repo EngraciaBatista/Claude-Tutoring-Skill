@@ -81,6 +81,13 @@ Design choices:
 - **One specialist per diagram type.** Each diagram agent has a short, focused prompt with the rules for its own UML type and Mermaid syntax, so diagrams break less often. They run in parallel.
 - **Traceable by design.** Every box and arrow must link to real code. The orchestrator spot-checks locations and validates the Mermaid before showing anything; anything unconfirmed is labeled *unverified*, not drawn as fact.
 - **Least privilege.** All subagents are read-only (`Read`, `Grep`, `Glob`). Only the orchestrator can write, and only to `.tutoring/explore/` after you say yes.
+- **Cost-aware by design.** Big codebases get expensive fast, so explore avoids paying twice or reading more than needed:
+  - *Right model per job* — diagram agents (map → Mermaid) run on Haiku, the explorer on Sonnet, and the main session does the checking and teaching.
+  - *Skeleton first* — large repos get a cheap outline (components, entry points, imports) and only the parts you pick are mapped in depth; tours go deep one unit at a time.
+  - *Incremental updates* — a saved map remembers its commit; next time, `git diff` decides which areas to re-read, and unchanged code is never explored again.
+  - *Only what's needed* — each diagram agent gets just its slice of the map, diagrams that can't apply (no database → no ER) are never started, and agents have tool-call budgets.
+  - *Verify against the map, not the code* — diagrams cite map IDs, so checking them needs no file reading; the map itself is spot-checked against the code once.
+  - Build mode keeps its conversation small: it reuses the explore map, hands searching to the `code-locator` agent, lets tests and linters check code, and compacts between subtasks.
 - **Graceful fallback.** Where subagents aren't available (Claude.ai), the skill runs the same steps itself, one after another.
 
 ## Repository layout
@@ -98,9 +105,10 @@ skills/tutoring-mode/
     explore/report.md · tour.md
     explore/fallback.md             same steps without subagents (Claude.ai)
 agents/
-  codebase-explorer.md              read-only mapper
+  codebase-explorer.md              read-only mapper (sonnet)
   diagram-component.md · diagram-class.md · diagram-sequence.md
-  diagram-activity.md · diagram-er.md · diagram-state.md
+  diagram-activity.md · diagram-er.md · diagram-state.md   (haiku; activity: sonnet)
+  code-locator.md                   build mode: finds file:line locations (haiku)
 ```
 
 ## Installing
@@ -119,7 +127,7 @@ Copy the skill and the agents into your Claude folder — `~/.claude/` for all p
 - `skills/tutoring-mode/` → `~/.claude/skills/tutoring-mode/`
 - `agents/*.md` → `~/.claude/agents/`
 
-Build mode works with just the skill. Explore mode needs the agents for the multi-agent version; without them it uses the fallback.
+Build mode works with just the skill (`code-locator` is optional and keeps sessions cheaper). Explore mode needs the agents for the multi-agent version; without them it uses the fallback.
 
 ### Claude.ai (web/desktop/mobile)
 
