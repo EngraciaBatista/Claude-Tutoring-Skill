@@ -6,7 +6,7 @@ Follow [../teaching-style.md](../teaching-style.md) throughout — simple langua
 
 ## Setup (both levels)
 
-1. **Get the map.** Reuse an existing one if possible (from this session, or `.tutoring/explore/map.md` — see [orchestration.md](orchestration.md) step 2). Otherwise run the explorer and `diagram-component`.
+1. **Get the map.** Reuse an existing one if possible (from this session, or `.tutoring/explore/map.md` — see [orchestration.md](orchestration.md) step 2). Otherwise run the explorer and `diagram-component`. For a large codebase, start from a `skeleton` map and go `deep` on each unit only when the tour reaches it (orchestration step 2) — the user may stop before the end, and unvisited units never get paid for.
 2. **Show the big picture.** The component diagram with its "How to read it" bullets.
 3. **Plan the tour.** Split it into **units** — usually one per component, or one per flow if the user's focus is a feature. Order them the way someone should learn them: start where requests come in, follow the data, end at storage/outside services (the map's reading guide helps). Present it as a checklist and let the user change it:
    ```
@@ -28,13 +28,13 @@ Then the check, which depends on the level.
 
 ## `tour --medium` — guided tour with quizzes (default)
 
-5. **Quiz** — up to 3 questions on what the unit does, where it lives, and how it connects to the rest.
-6. **2 or more wrong** → re-explain the unit more simply, with a **different** analogy and example, then quiz again (up to 3 questions).
+5. **Quiz** — up to 3 questions on what the unit does, where it lives, and how it connects to the rest. **Pass:** with 3 questions, 2 or more right; with 1–2 questions, all right.
+6. **Didn't pass** → re-explain the unit more simply, with a **different** analogy and example, then quiz again (up to 3 questions).
 7. **Still struggling** → offer a choice:
    - switch this unit to High (hands-on tasks, which sometimes click better than questions),
    - try Medium once more, or
    - skip it for now and come back to it at the end of the tour.
-8. **Pass** (2+ of 3 correct) → tick the unit off, move on.
+8. **Pass** (as defined in step 5) → tick the unit off, move on.
 
 ## `tour --high` — hands-on tour
 
@@ -45,7 +45,7 @@ Then the check, which depends on the level.
    - **Explain it back** — "Explain this unit to me as if I'm a new teammate on my first day."
 6. **Review each answer** — confirm what's right, explain what's off and why, give a hint that points in the right direction before giving the answer.
 7. **Cap: 3 attempts** per task. After 3, show the answer with its location and explain it fully, then move on.
-8. **Pass** — 80%+ of the unit's tasks right (within the attempts) → tick it off. Below that, re-explain the parts that were missed with a different angle and give one new task on them.
+8. **Pass** — with 3–4 tasks, all but one right; with 2 tasks, both right (each within its 3 attempts) → tick it off. A percentage doesn't work at this size (80% of 4 tasks would mean all 4). Below that, re-explain the parts that were missed with a different angle and give one new task on them.
 
 ## Wrap-up (both levels)
 

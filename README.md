@@ -41,6 +41,14 @@ Add a focus after any explore command — a folder, a feature, or a flow: `/tuto
 
 Results show in chat first. Claude then offers to save them to `.tutoring/explore/` in your project — and asks first whether to add `.tutoring/` to `.gitignore`. Explore never changes your code.
 
+### Viewing the diagrams
+
+Diagrams are written in [Mermaid](https://mermaid.js.org/), a text format that a viewer turns into a picture. In a terminal you'll see the text; to see the drawing, open it in any of these:
+
+- **VS Code** — install the [Markdown Preview Mermaid Support](https://marketplace.visualstudio.com/items?itemName=bierner.markdown-mermaid) extension, open the saved `.md` file (e.g. `.tutoring/explore/diagrams/component.md`), and press `Ctrl+Shift+V` (`Cmd+Shift+V` on Mac). VS Code's built-in preview doesn't draw Mermaid without it.
+- **GitHub** — draws Mermaid automatically in any `.md` file, issue, or PR.
+- **[mermaid.live](https://mermaid.live)** — paste one diagram's text (the part inside ` ```mermaid `) to see and export it as PNG or SVG.
+
 ## Architecture
 
 Explore mode is an **orchestrator–worker** multi-agent system. The skill, running in the main Claude session, acts as the orchestrator; specialist subagents do the reading and drawing.
@@ -73,6 +81,13 @@ Design choices:
 - **One specialist per diagram type.** Each diagram agent has a short, focused prompt with the rules for its own UML type and Mermaid syntax, so diagrams break less often. They run in parallel.
 - **Traceable by design.** Every box and arrow must link to real code. The orchestrator spot-checks locations and validates the Mermaid before showing anything; anything unconfirmed is labeled *unverified*, not drawn as fact.
 - **Least privilege.** All subagents are read-only (`Read`, `Grep`, `Glob`). Only the orchestrator can write, and only to `.tutoring/explore/` after you say yes.
+- **Cost-aware by design.** Big codebases get expensive fast, so explore avoids paying twice or reading more than needed:
+  - *Right model per job* — simple diagram agents (component, ER, state) run on Haiku; class, sequence, and activity diagrams and the explorer run on Sonnet; the main session does the checking and teaching. Every diagram agent ends with a completeness checklist, so nothing in its map slice is dropped silently.
+  - *Skeleton first* — large repos get a cheap outline (components, entry points, imports) and only the parts you pick are mapped in depth; tours go deep one unit at a time.
+  - *Incremental updates* — a saved map remembers its commit; next time, `git diff` decides which areas to re-read, and unchanged code is never explored again.
+  - *Only what's needed* — each diagram agent gets just its slice of the map, diagrams that can't apply (no database → no ER) are never started, and agents have tool-call budgets.
+  - *Verify against the map, not the code* — diagrams cite map IDs, so checking them needs no file reading; the map itself is spot-checked against the code once.
+  - Build mode keeps its conversation small: it reuses the explore map, hands searching to the `code-locator` agent, lets tests and linters check code, and compacts between subtasks.
 - **Graceful fallback.** Where subagents aren't available (Claude.ai), the skill runs the same steps itself, one after another.
 
 ## Repository layout
@@ -90,9 +105,10 @@ skills/tutoring-mode/
     explore/report.md · tour.md
     explore/fallback.md             same steps without subagents (Claude.ai)
 agents/
-  codebase-explorer.md              read-only mapper
+  codebase-explorer.md              read-only mapper (sonnet)
   diagram-component.md · diagram-class.md · diagram-sequence.md
-  diagram-activity.md · diagram-er.md · diagram-state.md
+  diagram-activity.md · diagram-er.md · diagram-state.md   (component/er/state: haiku; class/sequence/activity: sonnet)
+  code-locator.md                   build mode: finds file:line locations (haiku)
 ```
 
 ## Installing
@@ -111,7 +127,7 @@ Copy the skill and the agents into your Claude folder — `~/.claude/` for all p
 - `skills/tutoring-mode/` → `~/.claude/skills/tutoring-mode/`
 - `agents/*.md` → `~/.claude/agents/`
 
-Build mode works with just the skill. Explore mode needs the agents for the multi-agent version; without them it uses the fallback.
+Build mode works with just the skill (`code-locator` is optional and keeps sessions cheaper). Explore mode needs the agents for the multi-agent version; without them it uses the fallback.
 
 ### Claude.ai (web/desktop/mobile)
 
