@@ -31,7 +31,7 @@ Return exactly this structure, in Markdown. Leave a section with "None found" (a
 ```
 # Codebase map
 Repository: <root path>   Scope: <whole repo | what you were given>
-Commit: <git HEAD hash if visible in .git/HEAD + refs, else "unknown">
+Commit: <copy the commit hash given in your prompt exactly; if none was given, write "unknown" — don't try to work it out from .git files>
 Languages / frameworks: <…>
 
 ## Overview

@@ -31,9 +31,14 @@ Subagents can't launch other subagents, which is why the orchestrator is this sk
 
 ## 2. Map (codebase-explorer)
 
+**Get the commit first.** Run `git rev-parse HEAD` in the target. If it works, pass that hash to every explorer in its prompt (they copy it into the map's `Commit:` line — they can't run git themselves). If it fails (not a git repo, or git isn't available), the commit is `unknown`.
+
 **Reuse first.** Skip exploring if a map for the same scope already exists:
 - from earlier in this session, or
-- saved at `.tutoring/explore/map.md`. Compare its `Commit:` line with the current git HEAD. If they differ, tell the user the code has changed since the map was made and ask: refresh, or use the old map?
+- saved at `.tutoring/explore/map.md`. Compare its `Commit:` line with the current hash from `git rev-parse HEAD`.
+  - Same → reuse it.
+  - Different → tell the user the code has changed since the map was made and ask: refresh, or use the old map?
+  - Either side `unknown` → you can't tell if it's out of date. Say so and ask whether to reuse it or refresh. Don't call it outdated.
 
 **Size check.** Glob the source files in scope (exclude dependencies, build output, vendored code, lockfiles).
 - **Small/medium** (under ~150 source files in scope — even if they're spread across several apps or services): dispatch **one** `codebase-explorer` with the scope.

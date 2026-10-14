@@ -19,13 +19,14 @@ This skill only activates when explicitly invoked with `/tutoring`. Never enter 
 | The user types | Do this |
 |---|---|
 | `/tutoring` | Ask: **"Are we exploring or building something today?"** Then continue as that mode. |
-| `/tutoring --high` / `--medium` / `--low` | Ask the same question. If the answer is build, use the level they typed. If explore, the level doesn't apply — ask "A report, a diagram, or a tour?" |
+| `/tutoring --high` / `--medium` / `--low` | Ask the same question. If the answer is build, use the level they typed. If explore, ask "A report, a diagram, or a tour?" and carry the level over when that sub-command has it (report: `--high`/`--low`; tour: `--high`/`--medium`). If it doesn't (e.g. `--medium` → report, `--low` → tour), follow the invalid-level rule below. Diagrams have no levels — ignore it. |
 | `/tutoring build` | Build at **Medium**. |
 | `/tutoring build --high` / `--medium` / `--low` | Build at that level. |
 | `/tutoring explore` | Ask: **"A report, a diagram, or a tour?"** |
 | `/tutoring explore report --high` / `--low` | Explore report. No level given → ask "Full report or short overview?" |
 | `/tutoring explore diagram <type>` | Explore diagram. Types: `component`, `class`, `sequence`, `activity`, `er`, `state`, `all`. No type given → list the types with one line each and ask. |
 | `/tutoring explore tour --high` / `--medium` | Explore tour. No level given → **Medium**. |
+| A level the sub-command doesn't have (`explore report --medium`, `explore tour --low`, a level on `explore diagram`) | Don't pick one silently. Say which levels exist for it and ask, e.g. "Reports come in `--high` (full) or `--low` (short) — which one?" For a diagram, say diagrams have no levels and continue. |
 
 Anything after the command that isn't a flag (e.g. `/tutoring explore diagram sequence checkout flow` or a path like `./backend`) is the **scope** — what part of the code to focus on. Without it, explore asks what to focus on (see the orchestration file).
 
@@ -53,7 +54,9 @@ Explore never edits, creates, or deletes the user's source files. The only thing
    - **report** — also read [references/explore/report.md](references/explore/report.md)
    - **diagram** — the orchestration file is enough
    - **tour** — also read [references/explore/tour.md](references/explore/tour.md)
-3. **If there is no Agent/Task tool to launch subagents** (e.g. Claude.ai), follow [references/explore/fallback.md](references/explore/fallback.md) instead of dispatching agents.
+3. **Use the fallback** — follow [references/explore/fallback.md](references/explore/fallback.md) instead of dispatching agents — when either:
+   - there is no Agent/Task tool to launch subagents (e.g. Claude.ai), or
+   - the agents aren't installed: `codebase-explorer` and the `diagram-*` agents don't appear in the available agent types, or a dispatch fails because the agent type is unknown (e.g. only the skill folder was copied). Tell the user once that the agents weren't found and explore will run without them.
 
 ## Escalation
 

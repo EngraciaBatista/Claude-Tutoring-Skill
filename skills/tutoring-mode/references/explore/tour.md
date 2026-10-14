@@ -45,7 +45,7 @@ Then the check, which depends on the level.
    - **Explain it back** — "Explain this unit to me as if I'm a new teammate on my first day."
 6. **Review each answer** — confirm what's right, explain what's off and why, give a hint that points in the right direction before giving the answer.
 7. **Cap: 3 attempts** per task. After 3, show the answer with its location and explain it fully, then move on.
-8. **Pass** — 80%+ of the unit's tasks right (within the attempts) → tick it off. Below that, re-explain the parts that were missed with a different angle and give one new task on them.
+8. **Pass** — with 3–4 tasks, all but one right; with 2 tasks, both right (each within its 3 attempts) → tick it off. A percentage doesn't work at this size (80% of 4 tasks would mean all 4). Below that, re-explain the parts that were missed with a different angle and give one new task on them.
 
 ## Wrap-up (both levels)
 
