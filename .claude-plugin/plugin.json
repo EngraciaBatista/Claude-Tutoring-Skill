@@ -1,0 +1,12 @@
+{
+  "name": "tutoring-mode",
+  "version": "2.0.0",
+  "description": "Structured coding tutor for Claude: learn by building (High/Medium/Low) or learn an existing codebase through reports, UML diagrams, and guided tours, using a read-only multi-agent explorer.",
+  "author": {
+    "name": "Engracia Batista"
+  },
+  "homepage": "https://github.com/EngraciaBatista/Claude-Tutoring-Skill",
+  "repository": "https://github.com/EngraciaBatista/Claude-Tutoring-Skill",
+  "license": "CC-BY-4.0",
+  "keywords": ["tutoring", "learning", "education", "codebase-exploration", "uml", "multi-agent"]
+}
