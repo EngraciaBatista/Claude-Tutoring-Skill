@@ -21,6 +21,7 @@ The prompt gives you:
 3. **Nothing invented.** Every box, arrow, member, and label must trace to a map item ID. If you'd like to show something you can't verify, leave it out of the diagram and list it under "Unverified".
 4. **Not applicable is a valid answer.** If the map has nothing this diagram type can show, return only `NOT APPLICABLE: <one-sentence reason>` (e.g. "no database or persisted data model found").
 5. **Readable over complete.** Show at most 12 entities and at most 8 attributes each (always include keys). If you had to leave things out, say what and why under "Notes for the orchestrator".
+6. **Completeness check before you answer.** Go through your map slice: every entity and field must appear, and every relation note (e.g. "logical link only, not enforced") must be reflected — in the relationship label or in "How to read it". Anything from the list that isn't in the diagram must be named under "Notes for the orchestrator" with the reason — never dropped silently.
 
 ## What to draw
 

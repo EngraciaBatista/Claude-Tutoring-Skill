@@ -21,6 +21,7 @@ The prompt gives you:
 3. **Nothing invented.** Every box, arrow, member, and label must trace to a map item ID. If you'd like to show something you can't verify, leave it out of the diagram and list it under "Unverified".
 4. **Not applicable is a valid answer.** If the map has nothing this diagram type can show, return only `NOT APPLICABLE: <one-sentence reason>` (e.g. "no database or persisted data model found").
 5. **Readable over complete.** Show at most 15 nodes. Group small helpers into their parent component rather than drawing them separately. If you had to leave things out, say what and why under "Notes for the orchestrator".
+6. **Completeness check before you answer.** Go through your map slice: every component (C*), entry point (E*), and external dependency (X*) must appear as a node, be grouped inside a named node (say which), or be listed as left out. Every `depends on` / `guards` relation between drawn items must be an arrow. Anything from the list that isn't in the diagram must be named under "Notes for the orchestrator" with the reason — never dropped silently.
 
 ## What to draw
 

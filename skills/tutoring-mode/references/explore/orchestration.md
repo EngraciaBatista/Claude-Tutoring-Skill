@@ -67,13 +67,13 @@ Tell the user briefly what's happening while agents run ("Mapping the code in 3 
 | Type | Shows | Agent | Model | Needs from the map |
 |---|---|---|---|---|
 | `component` | The big parts and how they connect | `diagram-component` | haiku | Overview, Entry points, Components, External dependencies |
-| `class` | Classes, what they hold and do, and how they relate | `diagram-class` | haiku | Key classes for the focus component and its direct neighbors |
-| `sequence` | Who calls whom, in order, during one flow | `diagram-sequence` | haiku | The chosen flow + the E/C/K/X items it mentions |
+| `class` | Classes, what they hold and do, and how they relate | `diagram-class` | sonnet | Key classes for the focus component and its direct neighbors |
+| `sequence` | Who calls whom, in order, during one flow | `diagram-sequence` | sonnet | The chosen flow + the E/C/K/X items it mentions |
 | `activity` | Steps and yes/no decisions in one process | `diagram-activity` | sonnet | The chosen flow + the K items it mentions (it also reads those functions' source) |
 | `er` | Database tables and how they link | `diagram-er` | haiku | Data model |
 | `state` | The states one thing moves through | `diagram-state` | haiku | The chosen state machine |
 
-Diagram agents turn a map into Mermaid — a small, well-defined job — so most run on a small fast model. The explorer runs on a mid-size model. The orchestrator (this session) does the checking and teaching.
+Diagram agents turn a map into Mermaid. The simpler ones (component, ER, state) run on a small fast model; the ones that need more judgment — class relations, call order in a sequence, decision logic in an activity — run on a mid-size model. Measured on a test repo, the small model dropped relations and invented details on class and sequence diagrams, so those were moved up. The explorer runs on a mid-size model. The orchestrator (this session) does the checking and teaching.
 
 **Which agents to run:**
 

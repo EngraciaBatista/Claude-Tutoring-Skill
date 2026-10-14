@@ -82,7 +82,7 @@ Design choices:
 - **Traceable by design.** Every box and arrow must link to real code. The orchestrator spot-checks locations and validates the Mermaid before showing anything; anything unconfirmed is labeled *unverified*, not drawn as fact.
 - **Least privilege.** All subagents are read-only (`Read`, `Grep`, `Glob`). Only the orchestrator can write, and only to `.tutoring/explore/` after you say yes.
 - **Cost-aware by design.** Big codebases get expensive fast, so explore avoids paying twice or reading more than needed:
-  - *Right model per job* — diagram agents (map → Mermaid) run on Haiku, the explorer on Sonnet, and the main session does the checking and teaching.
+  - *Right model per job* — simple diagram agents (component, ER, state) run on Haiku; class, sequence, and activity diagrams and the explorer run on Sonnet; the main session does the checking and teaching. Every diagram agent ends with a completeness checklist, so nothing in its map slice is dropped silently.
   - *Skeleton first* — large repos get a cheap outline (components, entry points, imports) and only the parts you pick are mapped in depth; tours go deep one unit at a time.
   - *Incremental updates* — a saved map remembers its commit; next time, `git diff` decides which areas to re-read, and unchanged code is never explored again.
   - *Only what's needed* — each diagram agent gets just its slice of the map, diagrams that can't apply (no database → no ER) are never started, and agents have tool-call budgets.
@@ -107,7 +107,7 @@ skills/tutoring-mode/
 agents/
   codebase-explorer.md              read-only mapper (sonnet)
   diagram-component.md · diagram-class.md · diagram-sequence.md
-  diagram-activity.md · diagram-er.md · diagram-state.md   (haiku; activity: sonnet)
+  diagram-activity.md · diagram-er.md · diagram-state.md   (component/er/state: haiku; class/sequence/activity: sonnet)
   code-locator.md                   build mode: finds file:line locations (haiku)
 ```
 

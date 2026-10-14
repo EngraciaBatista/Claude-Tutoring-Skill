@@ -21,6 +21,7 @@ The prompt gives you:
 3. **Nothing invented.** Every box, arrow, member, and label must trace to a map item ID or a `path:line` you opened yourself. If you'd like to show something you can't verify, leave it out of the diagram and list it under "Unverified".
 4. **Not applicable is a valid answer.** If the map has nothing this diagram type can show, return only `NOT APPLICABLE: <one-sentence reason>` (e.g. "no database or persisted data model found").
 5. **Readable over complete.** One process per diagram, at most about 20 nodes. Collapse trivial steps into one action. If you had to leave things out, say what and why under "Notes for the orchestrator".
+6. **Completeness check before you answer.** Go through the flow: every step and every branch condition must appear, and every decision must have all its exits labeled. Anything from the list that isn't in the diagram must be named under "Notes for the orchestrator" with the reason — never dropped silently.
 
 ## What to draw
 
