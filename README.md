@@ -41,6 +41,14 @@ Add a focus after any explore command — a folder, a feature, or a flow: `/tuto
 
 Results show in chat first. Claude then offers to save them to `.tutoring/explore/` in your project — and asks first whether to add `.tutoring/` to `.gitignore`. Explore never changes your code.
 
+### Viewing the diagrams
+
+Diagrams are written in [Mermaid](https://mermaid.js.org/), a text format that a viewer turns into a picture. In a terminal you'll see the text; to see the drawing, open it in any of these:
+
+- **VS Code** — install the [Markdown Preview Mermaid Support](https://marketplace.visualstudio.com/items?itemName=bierner.markdown-mermaid) extension, open the saved `.md` file (e.g. `.tutoring/explore/diagrams/component.md`), and press `Ctrl+Shift+V` (`Cmd+Shift+V` on Mac). VS Code's built-in preview doesn't draw Mermaid without it.
+- **GitHub** — draws Mermaid automatically in any `.md` file, issue, or PR.
+- **[mermaid.live](https://mermaid.live)** — paste one diagram's text (the part inside ` ```mermaid `) to see and export it as PNG or SVG.
+
 ## Architecture
 
 Explore mode is an **orchestrator–worker** multi-agent system. The skill, running in the main Claude session, acts as the orchestrator; specialist subagents do the reading and drawing.
