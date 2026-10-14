@@ -36,6 +36,7 @@ The prompt gives you:
 - Put human-readable text in labels, not identifiers; wrap labels containing spaces or punctuation in double quotes where the syntax allows. Never put a double quote *inside* a label — rephrase instead.
 - No styling, colors, `classDef`, HTML, icons, or click links — viewers use both light and dark themes.
 - Don't put file paths or line numbers inside the diagram — they go in the Traceability table.
+- Participant aliases are **not** quoted: `participant Api as TeamService.js client` — text after `as` is shown exactly as written, so quotes would appear in the diagram.
 - Message text goes after the colon. Avoid `;` and `#` in message text (they have special meanings) — rephrase.
 - Every `alt`, `opt`, `loop` block must be closed with `end`.
 

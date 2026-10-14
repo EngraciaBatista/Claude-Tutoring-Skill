@@ -36,8 +36,8 @@ Subagents can't launch other subagents, which is why the orchestrator is this sk
 - saved at `.tutoring/explore/map.md`. Compare its `Commit:` line with the current git HEAD. If they differ, tell the user the code has changed since the map was made and ask: refresh, or use the old map?
 
 **Size check.** Glob the source files in scope (exclude dependencies, build output, vendored code, lockfiles).
-- **Small/medium** (under ~150 source files, one app): dispatch **one** `codebase-explorer` with the scope.
-- **Large** (more, or several apps/services in one repo): split the scope into 2–5 areas along top-level directories or services. Dispatch **one explorer per area, all in the same message** so they run in parallel. Tell each explorer its area and to note — not explore — connections to the other areas.
+- **Small/medium** (under ~150 source files in scope — even if they're spread across several apps or services): dispatch **one** `codebase-explorer` with the scope.
+- **Large** (over ~150 source files): split the scope into 2–5 areas along top-level directories or services, each roughly similar in size. Dispatch **one explorer per area, all in the same message** so they run in parallel. Tell each explorer its area and to note — not explore — connections to the other areas.
 
 **Merging parallel maps:**
 1. Prefix IDs with the area to keep them unique (`api.C1`, `web.K3`).
@@ -69,7 +69,7 @@ Tell the user briefly what's happening while agents run ("Mapping the code in 3 
 | `tour` | `diagram-component` (plus others on request during the tour) |
 
 **Dispatching:** launch all needed diagram agents **in one message** so they run in parallel. Each prompt contains:
-- the full merged codebase map,
+- the full merged codebase map — either pasted in, or, when several agents need it, written once to a temporary file **outside the user's repo** (e.g. the session's scratch/temp directory) with its path given to each agent,
 - the focus (the flow/component/entity), if any,
 - the repository root,
 - "Return exactly the output format in your instructions."
