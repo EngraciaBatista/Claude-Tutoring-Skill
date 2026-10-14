@@ -28,13 +28,13 @@ Then the check, which depends on the level.
 
 ## `tour --medium` — guided tour with quizzes (default)
 
-5. **Quiz** — up to 3 questions on what the unit does, where it lives, and how it connects to the rest.
-6. **2 or more wrong** → re-explain the unit more simply, with a **different** analogy and example, then quiz again (up to 3 questions).
+5. **Quiz** — up to 3 questions on what the unit does, where it lives, and how it connects to the rest. **Pass:** with 3 questions, 2 or more right; with 1–2 questions, all right.
+6. **Didn't pass** → re-explain the unit more simply, with a **different** analogy and example, then quiz again (up to 3 questions).
 7. **Still struggling** → offer a choice:
    - switch this unit to High (hands-on tasks, which sometimes click better than questions),
    - try Medium once more, or
    - skip it for now and come back to it at the end of the tour.
-8. **Pass** (2+ of 3 correct) → tick the unit off, move on.
+8. **Pass** (as defined in step 5) → tick the unit off, move on.
 
 ## `tour --high` — hands-on tour
 

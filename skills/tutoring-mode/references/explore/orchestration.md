@@ -35,6 +35,12 @@ The map is the expensive step, and its cost grows with the codebase. The rules b
 
 **Get the commit first.** Run `git rev-parse HEAD` in the target. If it works, pass that hash to every explorer in its prompt (they copy it into the map's `Commit:` line — they can't run git themselves). If it fails (not a git repo, or git isn't available), the commit is `unknown`.
 
+**Map depth.** Every map records its `Depth:` (header) and a `depth:` per component. A **skeleton** part has no classes, flows, data model, or state machines — those sections say "Skipped (skeleton)", which means *not looked at yet*, never "doesn't exist". When maps are merged, the header becomes `Depth: mixed` and each component keeps its own `depth:`.
+
+**Is the existing map deep enough?** Before reusing a map, check that the parts this command needs are `deep`:
+- `report --low` and `diagram component` → a skeleton is enough.
+- `report --high`, `tour`, and `diagram class | sequence | activity | er | state` → the focus component(s) must be `deep`. If they're skeleton, dispatch a `deep` explorer for just those components (ask the user to pick from the skeleton's component list if there's no focus yet), merge it in, and then continue. For `er` and `state` with no focus, go deep on the components most likely to hold them (models, entities, schema, workflow/status code) and say that's what you did.
+
 **Reuse or update — don't redo.** Check for an existing map for the same scope (from earlier in this session, or saved at `.tutoring/explore/map.md`) and compare its `Commit:` with the current hash:
 - **Same** → reuse it as is.
 - **Different** → run `git diff --name-only <map commit> HEAD`, keeping only source files in scope:
@@ -88,8 +94,10 @@ Diagram agents turn a map into Mermaid. The simpler ones (component, ER, state) 
 **Skip what can't apply — before dispatching.** Don't start an agent just to hear "not applicable":
 - `er` → skip if the map's Data model says "None found"
 - `state` → skip if State machines says "None found"
-- `sequence` / `activity` → skip if there are no Flows
+- `sequence` / `activity` → skip if Flows says "None found"
 - `class` → skip if Key classes has no classes, interfaces, or structs (only plain functions)
+
+Only a deep "None found" counts. "Skipped (skeleton)" means the section hasn't been explored — go deep first (see "Is the existing map deep enough?" in step 2), never skip and never dispatch a diagram agent with an empty slice.
 
 Tell the user in one line why each skipped diagram was skipped (e.g. "No ER diagram: this project doesn't store data in a database"). If an agent still returns `NOT APPLICABLE`, don't retry.
 
@@ -105,7 +113,10 @@ Tell the user in one line why each skipped diagram was skipped (e.g. "No ER diag
 
 Before showing each diagram:
 
-0. **Check coverage.** From the size check you already know which top-level folders contain source files. If one of them isn't covered by any component in the map (and isn't listed under "Not explored"), the explorer missed it — dispatch one more explorer for just that folder and merge it in before going on.
+0. **Check coverage — once, right after an explorer returns, and only for what it was asked to map.** From the size check you know which top-level folders contain source files.
+   - After a **skeleton** of the whole scope: every source folder should appear as a component (at skeleton depth).
+   - After a **deep** run: only the folders inside that run's scope need to appear at deep depth. Folders the user didn't choose to go deep on are expected to stay skeleton (or absent, for a scoped run) — that isn't a miss.
+   - A folder that should be there but isn't (and isn't listed under "Not explored") was missed: dispatch one more explorer, at the same depth, for just that folder, and merge it in. Don't repeat this check for each diagram.
 1. **Check the map once, against the code.** The first time a map is used (new or updated), open the lines for 5 of its most important items (entry points, central classes, a flow step). Is the named thing actually there? Wrong → fix it or move it to Unverified.
 2. **Check each diagram against the map — no file reading needed.** Diagram agents cite map IDs, so check that every ID in the Traceability table exists in the map and that the element matches it (name, relation, field). The exception is `activity`, which reads source: also open up to 3 of its non-map locations.
    - More than 1 mismatch in a diagram → send that agent back once with the corrections; if it's still wrong, show the diagram with a clear warning.

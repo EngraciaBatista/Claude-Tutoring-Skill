@@ -49,6 +49,7 @@ Return exactly this structure, in Markdown. Leave a section with "None found" (a
 # Codebase map
 Repository: <root path>   Scope: <whole repo | what you were given>
 Commit: <copy the commit hash given in your prompt exactly; if none was given, write "unknown" — don't try to work it out from .git files>
+Depth: <deep | skeleton | update — the depth you were given>
 Languages / frameworks: <…>
 
 ## Overview
@@ -58,7 +59,7 @@ Languages / frameworks: <…>
 - E1 <name> — <path:line> — <what starts here>
 
 ## Components
-- C1 <name> — <paths/dirs> — <responsibility, one line>
+- C1 <name> — <paths/dirs> — <responsibility, one line> — depth: <deep | skeleton>
   depends on: C2, C4 (evidence: <path:line of an import or call>)
 
 ## Key classes and functions

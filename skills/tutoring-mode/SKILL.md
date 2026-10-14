@@ -48,7 +48,9 @@ Read only the file for the level in use:
 **Every level — keep the session lean.** Build sessions get expensive by growing, since every turn re-reads the whole conversation. So:
 
 1. **Finding code (in this order):**
-   - **Use the explore map if there is one.** If `.tutoring/explore/map.md` exists, use its locations instead of searching. Check with `git diff --name-only <map commit> HEAD` which files changed since; re-read only those.
+   - **Use the explore map if it covers the area.** If `.tutoring/explore/map.md` exists, use its locations instead of searching — but only for components marked `depth: deep` that cover the area of this task. A skeleton part, or an area the map doesn't include, is only a hint about where to look: find the exact lines another way (below).
+     - Commit known → run `git diff --name-only <map commit> HEAD`; re-read only the changed files before quoting their lines.
+     - `Commit: unknown`, or the diff fails (not a git repo, rebased history) → you can't tell what changed, so treat every map location as a hint and re-check each line before quoting it.
    - **Otherwise send `code-locator`** (if installed) with the question ("where is login handled?", "where would a new endpoint go?") and any map locations you have. It returns file:line locations only, so the search itself never enters this conversation.
    - **Otherwise search narrowly yourself:** Grep first, then read only the line ranges you need.
 2. **Let tools check the code.** After the user writes code (High) or after each unit (Medium), run the project's relevant tests and linter if it has them, and review with their results instead of reasoning through every line by hand.
