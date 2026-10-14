@@ -19,7 +19,7 @@ Work with whatever the user has given access to: uploaded files or a zip, pasted
    Data model (D*: fields, keys, relations) · State machines (S*: states, transitions)
    External dependencies (X*) · Reading guide (5 files) · Unverified
    ```
-   For a large codebase, map one area at a time and merge as you go.
+   Read efficiently: search for definitions before opening files, read line ranges rather than whole files, and skip dependencies, build output, generated code, lockfiles, and tests. For a large codebase, make an outline first (components and entry points only), let the user pick where to go deep, and map one area at a time.
 3. **Diagrams** — draw each needed diagram one at a time (same "which diagrams" table as orchestration step 3), in Mermaid:
 
    - **component** — `flowchart LR`. At most 15 nodes; components as boxes `Id["…"]`, databases `Id[("…")]`, outside services `Id(["…"])`; arrows mean "uses", with 1–3 word labels: `A -->|"calls"| B`.

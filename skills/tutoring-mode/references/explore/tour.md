@@ -6,7 +6,7 @@ Follow [../teaching-style.md](../teaching-style.md) throughout — simple langua
 
 ## Setup (both levels)
 
-1. **Get the map.** Reuse an existing one if possible (from this session, or `.tutoring/explore/map.md` — see [orchestration.md](orchestration.md) step 2). Otherwise run the explorer and `diagram-component`.
+1. **Get the map.** Reuse an existing one if possible (from this session, or `.tutoring/explore/map.md` — see [orchestration.md](orchestration.md) step 2). Otherwise run the explorer and `diagram-component`. For a large codebase, start from a `skeleton` map and go `deep` on each unit only when the tour reaches it (orchestration step 2) — the user may stop before the end, and unvisited units never get paid for.
 2. **Show the big picture.** The component diagram with its "How to read it" bullets.
 3. **Plan the tour.** Split it into **units** — usually one per component, or one per flow if the user's focus is a feature. Order them the way someone should learn them: start where requests come in, follow the data, end at storage/outside services (the map's reading guide helps). Present it as a checklist and let the user change it:
    ```

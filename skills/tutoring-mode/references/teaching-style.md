@@ -56,4 +56,4 @@ A learner who can't find the code can't own it. Names alone ("the `UserService` 
 - **Point at blocks, not just files.** "Lines 40–58 of `client.py` — the `try/except` block — is where failures are caught."
 - **Find-it-first prompts** (Build Medium/High, Explore tour): before explaining a block, ask the user to open the file and find it themselves. "Open `src/http/client.py`. Can you find where the request is retried? Tell me the line." Then confirm or guide.
 - **Show the path between pieces.** When one piece calls another, name both ends: "`checkout()` (`src/cart.py:88`) calls `charge()` (`src/payments/stripe.py:21`)."
-- **Line numbers must be real.** Read the file before quoting a line number. If the code may have changed since, re-check. Never guess a location.
+- **Line numbers must be real.** Read the file before quoting a line number. Never guess a location. Re-check only when the file may have changed since you read it (you or the user edited it, or `git diff --name-only` lists it) — otherwise reuse the line numbers you already have.
