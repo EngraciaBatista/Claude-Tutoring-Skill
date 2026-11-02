@@ -24,5 +24,6 @@ claude plugin eval . --allow-tools Write,Edit,Bash --scaffold
 | `review-nothing-due` | Review doesn't quiz when nothing is due |
 | `resume-picks-up-next` | Resume continues from Next and doesn't redo finished work |
 | `read-only-explore` | A diagram that can't apply is skipped, and explore changes nothing |
+| `high-explains-the-code` | High level walks through the code with real values, with no opening analogy |
 
 Results go to `evals/results/`.

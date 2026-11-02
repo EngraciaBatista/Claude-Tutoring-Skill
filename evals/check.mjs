@@ -8,19 +8,22 @@ const SKILL = 'skills/tutoring';
 const R = `${SKILL}/references`;
 const S = `${SKILL}/SKILL.md`;
 const STYLE = `${R}/teaching-style.md`;
+const SIMPLE = `${R}/explain-simple.md`;
+const HIGH = `${R}/explain-high.md`;
 const PROG = `${R}/progress.md`;
 const ORCH = `${R}/explore/orchestration.md`;
 const MAP = `${R}/map-reuse.md`;
 
 const COMMANDS = {
-  'build low': { files: [S, STYLE, PROG, MAP, `${R}/build/low.md`], budget: 6900 },
-  'build medium': { files: [S, STYLE, PROG, MAP, `${R}/build/medium.md`], budget: 6950 },
-  'build high': { files: [S, STYLE, PROG, MAP, `${R}/build/high.md`], budget: 7800 },
-  'explore diagram': { files: [S, STYLE, MAP, ORCH], budget: 9650 },
-  'explore report': { files: [S, STYLE, MAP, ORCH, `${R}/explore/report.md`], budget: 10500 },
-  'explore tour': { files: [S, STYLE, PROG, MAP, ORCH, `${R}/explore/tour.md`], budget: 12100 },
-  review: { files: [S, STYLE, PROG, `${R}/review.md`], budget: 6200 },
-  drill: { files: [S, STYLE, PROG, `${R}/drill.md`], budget: 6200 },
+  'build low': { files: [S, STYLE, SIMPLE, PROG, MAP, `${R}/build/low.md`], budget: 6900 },
+  'build medium': { files: [S, STYLE, SIMPLE, PROG, MAP, `${R}/build/medium.md`], budget: 6950 },
+  'build high': { files: [S, STYLE, HIGH, PROG, MAP, `${R}/build/high.md`], budget: 7800 },
+  'explore diagram': { files: [S, STYLE, SIMPLE, MAP, ORCH], budget: 9650 },
+  'explore report': { files: [S, STYLE, SIMPLE, MAP, ORCH, `${R}/explore/report.md`], budget: 10500 },
+  'tour medium': { files: [S, STYLE, SIMPLE, PROG, MAP, ORCH, `${R}/explore/tour.md`], budget: 12100 },
+  'tour high': { files: [S, STYLE, HIGH, PROG, MAP, ORCH, `${R}/explore/tour.md`], budget: 12100 },
+  review: { files: [S, STYLE, SIMPLE, PROG, `${R}/review.md`], budget: 6200 },
+  drill: { files: [S, STYLE, SIMPLE, PROG, `${R}/drill.md`], budget: 6200 },
 };
 
 const failures = [];
@@ -60,6 +63,17 @@ for (const f of walk(SKILL)) {
 // Rules found the hard way: plugin agents have a prefix, and subagents can't always read outside the project
 if (!read(S).includes('tutoring-mode:codebase-explorer')) failures.push('SKILL.md lost the plugin agent name rule');
 if (!read(ORCH).includes('CANNOT READ MAP')) failures.push('orchestration.md lost the CANNOT READ MAP rule');
+
+// Each mode must still be pointed at its explanation file
+for (const f of [S, STYLE]) {
+  for (const name of ['explain-high.md', 'explain-simple.md']) {
+    if (!read(f).includes(name)) failures.push(`${f} lost the link to ${name}`);
+  }
+}
+if (!read(`${R}/build/high.md`).includes('explain-high.md')) failures.push('build/high.md lost the link to explain-high.md');
+for (const name of ['explain-high.md', 'explain-simple.md']) {
+  if (!read(`${R}/explore/tour.md`).includes(name)) failures.push(`tour.md lost the link to ${name}`);
+}
 
 // Every agent stays read-only
 const agents = fs.readdirSync('agents').map((f) => `agents/${f}`);

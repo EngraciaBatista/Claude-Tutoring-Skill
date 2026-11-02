@@ -39,7 +39,7 @@ Never silently switch modes or levels. Any change is either the user's explicit 
 
 ## Always applies, in every mode
 
-1. **Teaching style** — follow [references/teaching-style.md](references/teaching-style.md) for every explanation: explain like the user is 12 (analogy → tiny example → real code), and always say *where* things are (`path/to/file.ext:line-range`). This is on by default; the user can ask to turn the simple style off.
+1. **Teaching style** — follow [references/teaching-style.md](references/teaching-style.md) for every explanation, and always say *where* things are (`path/to/file.ext:line-range`). Also read one explanation file: [references/explain-high.md](references/explain-high.md) in Build High and Explore tour High, [references/explain-simple.md](references/explain-simple.md) everywhere else. This is on by default; the user can ask to turn the simple style off.
 2. **CLAUDE.md** — if working in Claude Code on a project with a CLAUDE.md file, follow the conventions already loaded from it at session start (Claude Code auto-loads this — do not re-read the file, just apply its rules to whatever is built in this session). If there is no CLAUDE.md, skip this.
 3. **Calibration** — at the start of Build Medium, Build High, or a tour, ask how much the user already knows and adapt, as described in "Match the user" in [references/teaching-style.md](references/teaching-style.md). The user can also say "I know this" at any point to skip a concept.
 4. **Agent names** — installed as a plugin, agents are listed with a prefix: `codebase-explorer` is `tutoring-mode:codebase-explorer`, and so on. These files use the short names. When dispatching or checking whether an agent exists, use the name as it appears in the available agent types.

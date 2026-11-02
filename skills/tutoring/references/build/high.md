@@ -2,7 +2,7 @@
 
 Full teaching loop where **the user is the producer, not a passenger**. Use when the user needs deep, durable understanding — to be able to teach or defend the work, not just ship it.
 
-Follow [../teaching-style.md](../teaching-style.md) throughout: simple language with analogies and examples, and a location for everything mentioned.
+Follow [../teaching-style.md](../teaching-style.md) and [../explain-high.md](../explain-high.md) throughout: simple language with real values, and a location for everything mentioned.
 
 ## 1. The problem
 
@@ -39,11 +39,11 @@ Present it and ask the user to confirm or change it before starting. Show the up
 
 **a. Lesson.** Teach what's needed for this subtask only:
 - the problem this piece solves,
-- the topics/concepts involved (analogy → tiny example → small code),
+- the topics/concepts involved (real values → small code, explained line by line),
 - how it can be solved, and
 - where in the code it goes (file, and the block/line range where it fits).
 
-**b. Knowledge check.** At least one question per concept in the lesson. To pass and start writing code: with 1–2 questions, all right; with 3–4, all but one; with 5 or more, at most one wrong in every 4. (A percentage doesn't work for checks this small — 80% of 2 questions would mean both.) A wrong answer triggers a re-explanation of *that concept* from a different angle (new analogy, new example), then a new question. **Cap: 3 rounds per concept.** If the user is still stuck after that, offer a choice: try once more, or show the answer, move on to writing the code, and add the concept to Queued in the progress file so it comes back later.
+**b. Knowledge check.** At least one question per concept in the lesson. To pass and start writing code: with 1–2 questions, all right; with 3–4, all but one; with 5 or more, at most one wrong in every 4. (A percentage doesn't work for checks this small — 80% of 2 questions would mean both.) A wrong answer triggers a re-explanation of *that concept* from a different angle (a new example, or an analogy if the code alone isn't landing), then a new question. **Cap: 3 rounds per concept.** If the user is still stuck after that, offer a choice: try once more, or show the answer, move on to writing the code, and add the concept to Queued in the progress file so it comes back later.
 
 **c. The user writes the code.** The user is the one who types the important lines.
 - Claude may give a **skeleton with `TODO`s** — function signature, imports, surrounding structure — but the `TODO`s are the core logic, and the user fills them in.

@@ -9,7 +9,7 @@ Four modes, all tutoring:
 - **Review** — keep it. Spaced quizzes on what you learned in earlier sessions.
 - **Drill** — practice saying it out loud. Claude plays a sceptical teammate and you defend the work.
 
-Explanations start **like you're 12** (analogy → small example → the real code) and adapt to what you already know, and they always tell you **where things are** — file and line range, not just a function name. Say "I know this" at any point to skip a concept.
+Explanations start **like you're 12** (analogy → small example → the real code) and adapt to what you already know. At High level they skip the analogies and walk through the code line by line instead. They always tell you **where things are** — file and line range, not just a function name. Say "I know this" at any point to skip a concept.
 
 ## Commands
 
@@ -114,7 +114,9 @@ Design choices:
 skills/tutoring/
   SKILL.md                          commands, mode selection, shared rules
   references/
-    teaching-style.md               "explain like I'm 12", matching the user, always say where things are
+    teaching-style.md               matching the user, language rules, always say where things are
+    explain-simple.md               "explain like I'm 12": analogy → small example → the real code
+    explain-high.md                 High level: line-by-line code walkthroughs with real values
     progress.md                     the progress file and /tutoring resume
     map-reuse.md                    where maps live and how to tell if they're still current
     review.md                       spaced review quizzes

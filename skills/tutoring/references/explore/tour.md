@@ -2,7 +2,7 @@
 
 A guided walk through an existing codebase, one piece at a time, checking understanding as it goes. Read-only: the user explores and answers, nothing in the code changes.
 
-Follow [../teaching-style.md](../teaching-style.md) throughout — simple language with analogies and examples, find-it-first prompts, and a location for everything.
+Follow [../teaching-style.md](../teaching-style.md) throughout — simple language, find-it-first prompts, and a location for everything. For `--high`, also follow [../explain-high.md](../explain-high.md); for `--medium`, [../explain-simple.md](../explain-simple.md).
 
 ## Setup (both levels)
 
@@ -21,7 +21,7 @@ Follow [../teaching-style.md](../teaching-style.md) throughout — simple langua
 
 1. **Where this lives** — files and what each is for. Point to the box on the component diagram.
 2. **Find it first** — ask the user to open the main file and find the key block before explaining it.
-3. **Explain** — what it does, why it exists, how it works (analogy → tiny example → the real code with line ranges), and how it connects to the units before and after.
+3. **Explain** — what it does, why it exists, how it works (with the real code and its line ranges), and how it connects to the units before and after.
 4. Offer a diagram if it would help this unit (e.g. a sequence diagram for a flow, a class diagram for a component with many classes) — dispatch the diagram agent on request.
 
 Then the check, which depends on the level.
