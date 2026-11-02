@@ -1,5 +1,5 @@
 ---
-name: tutoring-mode
+name: tutoring
 description: Structured tutoring for coding sessions, triggered explicitly with /tutoring. Four modes — "build" (learn by building something new, at --high, --medium, or --low depth), "explore" (learn an existing codebase, read-only, through a report, UML diagrams, or a guided tour), "review" (spaced quizzes on earlier work), and "drill" (defend the work to a sceptical teammate) — plus "resume" to pick up an unfinished session. Use this skill whenever the user invokes /tutoring or any of its sub-commands — it governs how Claude explains, where it points the user in the code, how it checks understanding, and, in explore mode, how it orchestrates the codebase-explorer and diagram subagents.
 ---
 
@@ -16,7 +16,7 @@ Four modes, all of them tutoring:
 
 ## Activation
 
-This skill only activates when explicitly invoked with `/tutoring`. Never enter tutoring mode without it.
+This skill only activates when explicitly invoked with `/tutoring`. Never enter tutoring mode without it. Installed as a plugin, the same command is `/tutoring-mode:tutoring`: everything after it works exactly the same as in the table below.
 
 | The user types | Do this |
 |---|---|
@@ -42,7 +42,8 @@ Never silently switch modes or levels. Any change is either the user's explicit 
 1. **Teaching style** — follow [references/teaching-style.md](references/teaching-style.md) for every explanation: explain like the user is 12 (analogy → tiny example → real code), and always say *where* things are (`path/to/file.ext:line-range`). This is on by default; the user can ask to turn the simple style off.
 2. **CLAUDE.md** — if working in Claude Code on a project with a CLAUDE.md file, follow the conventions already loaded from it at session start (Claude Code auto-loads this — do not re-read the file, just apply its rules to whatever is built in this session). If there is no CLAUDE.md, skip this.
 3. **Calibration** — at the start of Build Medium, Build High, or a tour, ask how much the user already knows and adapt, as described in "Match the user" in [references/teaching-style.md](references/teaching-style.md). The user can also say "I know this" at any point to skip a concept.
-4. **Progress** — Build, tours, Review, and Drill keep `.tutoring/progress.md` as described in [references/progress.md](references/progress.md), once the user has agreed to it. Read that file before the first write.
+4. **Agent names** — installed as a plugin, agents are listed with a prefix: `codebase-explorer` is `tutoring-mode:codebase-explorer`, and so on. These files use the short names. When dispatching or checking whether an agent exists, use the name as it appears in the available agent types.
+5. **Progress** — Build, tours, Review, and Drill keep `.tutoring/progress.md` as described in [references/progress.md](references/progress.md), once the user has agreed to it. Read that file before the first write.
 
 ## Build mode
 
@@ -56,7 +57,7 @@ Read only the file for the level in use:
 
 1. **Finding code (in this order):**
    - **Use the explore map if it covers the area.** If there's a map at `.tutoring/explore/map.md`, or an auto-saved one at `~/.claude/tutoring/<repo folder name>/map.md` whose `Repository:` line matches this project, use its locations instead of searching — but only for components marked `depth: deep` that cover the area of this task. A skeleton part, or an area the map doesn't include, is only a hint about where to look: find the exact lines another way (below).
-     - Commit known → run `git diff --name-only <map commit> HEAD`; re-read only the changed files before quoting their lines.
+     - Commit known → run `git diff --name-only <map commit>` and `git ls-files -o --exclude-standard` (these also catch uncommitted edits and new files); re-read only the changed files before quoting their lines.
      - `Commit: unknown`, or the diff fails (not a git repo, rebased history) → you can't tell what changed, so treat every map location as a hint and re-check each line before quoting it.
    - **Otherwise send `code-locator`** (if installed) with the question ("where is login handled?", "where would a new endpoint go?") and any map locations you have. It returns file:line locations only, so the search itself never enters this conversation.
    - **Otherwise search narrowly yourself:** Grep first, then read only the line ranges you need.
@@ -74,7 +75,7 @@ Explore never edits, creates, or deletes the user's source files. Inside the pro
    - **tour** — also read [references/explore/tour.md](references/explore/tour.md)
 3. **Use the fallback** — follow [references/explore/fallback.md](references/explore/fallback.md) instead of dispatching agents — when either:
    - there is no Agent/Task tool to launch subagents (e.g. Claude.ai), or
-   - the agents aren't installed: `codebase-explorer` and the `diagram-*` agents don't appear in the available agent types, or a dispatch fails because the agent type is unknown (e.g. only the skill folder was copied). Tell the user once that the agents weren't found and explore will run without them.
+   - the agents aren't installed: `codebase-explorer` and the `diagram-*` agents don't appear in the available agent types under either name (see "Agent names" above), or a dispatch fails because the agent type is unknown (e.g. only the skill folder was copied). Tell the user once that the agents weren't found and explore will run without them.
 
 ## Escalation
 

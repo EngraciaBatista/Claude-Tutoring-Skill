@@ -42,9 +42,8 @@ The map is the expensive step, and its cost grows with the codebase. The rules b
 - `report --low` and `diagram component` → a skeleton is enough.
 - `report --high`, `tour`, and `diagram class | sequence | activity | er | state` → the focus component(s) must be `deep`. If they're skeleton, dispatch a `deep` explorer for just those components (ask the user to pick from the skeleton's component list if there's no focus yet), merge it in, and then continue. For `er` and `state` with no focus, go deep on the components most likely to hold them (models, entities, schema, workflow/status code) and say that's what you did.
 
-**Reuse or update — don't redo.** Check for an existing map that covers this scope, in this order: earlier in this session, saved at `.tutoring/explore/map.md`, auto-saved at `~/.claude/tutoring/<repo folder name>/map.md`. Ignore an auto-saved map whose `Repository:` line isn't this project (another project can share a folder name). Compare its `Commit:` with the current hash:
-- **Same** → reuse it as is.
-- **Different** → run `git diff --name-only <map commit> HEAD`, keeping only source files in scope:
+**Reuse or update — don't redo.** Check for an existing map that covers this scope, in this order: earlier in this session, saved at `.tutoring/explore/map.md`, auto-saved at `~/.claude/tutoring/<repo folder name>/map.md`. Ignore an auto-saved map whose `Repository:` line isn't this project (another project can share a folder name). If the map's `Commit:` is known, run `git diff --name-only <map commit>` and `git ls-files -o --exclude-standard`, keeping only source files in scope. Do this even when the commit matches the current hash: without `HEAD` in the command, these also catch uncommitted edits and new files.
+- **Commit known:**
   - none of the changed files are in scope → reuse the map and say it's still current for this scope;
   - some are → tell the user which areas changed and offer an **update**: dispatch an explorer in `update` depth for each affected component, with its old map sections and its changed files, then patch those sections into the map (keep IDs stable, drop items listed as removed). Update the map's `Commit:` line;
   - more than ~40% of the in-scope source files changed, or the diff fails (e.g. the old commit no longer exists after a rebase) → offer a full refresh instead.
@@ -52,7 +51,7 @@ The map is the expensive step, and its cost grows with the codebase. The rules b
 
 **Size check.** Count the source files in scope with a quick command (e.g. `git ls-files` filtered by source extensions, or Glob), excluding dependencies, build output, vendored and generated code, lockfiles, and tests.
 
-- **Small/medium** (under ~150 source files in scope — even if spread across several apps): dispatch **one** explorer, `deep`, budget 60 tool calls.
+- **Small/medium** (under ~150 source files in scope — even if spread across several apps): dispatch **one** explorer, `deep`, with a budget of 60 tool calls or one per source file, whichever is higher.
 - **Large** (over ~150): **skeleton first.**
   1. Dispatch one explorer with depth `skeleton` for the whole scope (budget 40). This is cheap: no class bodies, no flow tracing.
   2. Show the user the skeleton (overview + component list, or a component diagram) and ask which part to go deep on — unless the command already named one. A `report --low` can often be answered from the skeleton alone.
@@ -105,7 +104,11 @@ Only a deep "None found" counts. "Skipped (skeleton)" means the section hasn't b
 Tell the user in one line why each skipped diagram was skipped (e.g. "No ER diagram: this project doesn't store data in a database"). If an agent still returns `NOT APPLICABLE`, don't retry.
 
 **Dispatching:** launch all needed diagram agents **in one message** so they run in parallel. Each prompt contains:
-- **only the map sections that agent needs** (table above), not the whole map. Paste them in, or — when several agents share large sections — write them once to temporary files **outside the user's repo** (e.g. the session's scratch/temp directory) and give each agent its path,
+- **only the map sections that agent needs** (table above), given the cheapest way available. This session usually runs the most expensive model, and retyping sections into prompts costs more than a smaller agent reading a file:
+  - map saved at `.tutoring/explore/map.md` → give the path and the section names. Don't retype anything.
+  - map not saved in the project, and 3 or more agents to run → first ask once: "Save the code map to `.tutoring/explore/` so the diagram helpers can read it? That's cheaper than copying it to each one." Yes → follow step 6 for this file (the `.gitignore` question comes first), then give the path. No → paste.
+  - otherwise → paste the sections in.
+  - Never point agents at the auto-saved map, or anything else outside the project: subagents can be refused permission to read there. If an agent returns `CANNOT READ MAP`, paste its sections and dispatch it again.
 - the focus (the flow/component/entity), if any,
 - the repository root,
 - "Return exactly the output format in your instructions."
@@ -119,9 +122,11 @@ Before showing each diagram:
 0. **Check coverage — once, right after an explorer returns, and only for what it was asked to map.** From the size check you know which top-level folders contain source files.
    - After a **skeleton** of the whole scope: every source folder should appear as a component (at skeleton depth).
    - After a **deep** run: only the folders inside that run's scope need to appear at deep depth. Folders the user didn't choose to go deep on are expected to stay skeleton (or absent, for a scoped run) — that isn't a miss.
+   - For a **deep** run, check one level further down too: a big subfolder with no component or key item in the map was probably cut off by the budget, even if its parent folder appears.
    - A folder that should be there but isn't (and isn't listed under "Not explored") was missed: dispatch one more explorer, at the same depth, for just that folder, and merge it in. Don't repeat this check for each diagram.
 1. **Check the map once, against the code.** The first time a map is used (new or updated), open the lines for 5 of its most important items (entry points, central classes, a flow step). Is the named thing actually there? Wrong → fix it or move it to Unverified.
 2. **Check each diagram against the map — no file reading needed.** Diagram agents cite map IDs, so check that every ID in the Traceability table exists in the map and that the element matches it (name, relation, field). The exception is `activity`, which reads source: also open up to 3 of its non-map locations.
+   - **Count what's missing, too.** IDs only prove that what was drawn is real, not that nothing was dropped. Count the items and relations in the agent's map slice, and the elements and arrows in the diagram. Every difference must be named under "Notes for the orchestrator"; one that isn't counts as a mismatch.
    - More than 1 mismatch in a diagram → send that agent back once with the corrections; if it's still wrong, show the diagram with a clear warning.
 3. **Check the Mermaid.** If the Mermaid CLI (`mmdc`) or the `mermaid` package is available, parse each diagram in a temporary location **outside the user's repo**. Fix small syntax errors yourself; otherwise send the agent back once. If neither is available, check against the agent's syntax rules by eye (closed `end` blocks, no quotes inside labels, no reserved `end` id).
 
@@ -138,12 +143,13 @@ After presenting, ask once: **"Want me to save this to `.tutoring/explore/` in t
 
 If yes:
 1. **First, ask about `.gitignore`** — if the project is a git repo and `.tutoring/` isn't already ignored: "Should I add `.tutoring/` to `.gitignore` so these files don't get committed?" Do what they answer.
-2. If any of the files below already exist, list them and confirm before overwriting.
+2. If any of the report or diagram files below already exist, list them and confirm before overwriting. Never replace `map.md` with a smaller scope: merge the new parts into it (step 2).
 3. Write:
    ```
    .tutoring/explore/
-     map.md                  ← the merged codebase map (with the Commit: line) — lets tours and later runs reuse it
-     report.md               ← for report --high (or report-short.md for --low)
-     diagrams/<type>.md      ← one file per diagram: Mermaid block + How to read it + Traceability
+     map.md                       ← the merged codebase map (with the Commit: line) — lets tours and later runs reuse it
+     report.md                    ← for report --high (or report-short.md for --low)
+     diagrams/<type>.md           ← one file per diagram, whole-project: Mermaid block + How to read it + Traceability
+     diagrams/<type>-<focus>.md   ← the same, for a focused diagram, e.g. sequence-checkout-flow.md
    ```
 4. Tell the user what was written, as clickable links.

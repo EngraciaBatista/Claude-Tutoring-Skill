@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: resume-picks-up-next
+expected_outcome: |
+  Claude summarises where the session stands and continues from Next, without redoing finished subtasks.
+context:
+  scaffold_script: place-files.sh

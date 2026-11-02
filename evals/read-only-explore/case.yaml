@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: read-only-explore
+expected_outcome: |
+  The project has no database, so Claude says in one line why there's no ER diagram, and changes nothing in the project.
+context:
+  scaffold_script: place-files.sh

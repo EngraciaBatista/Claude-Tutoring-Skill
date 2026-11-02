@@ -13,6 +13,8 @@ Explanations start **like you're 12** (analogy → small example → the real co
 
 ## Commands
 
+This README writes every command as `/tutoring`, which is what you type after a manual install. **After a plugin install, type `/tutoring-mode:tutoring` instead**, for example `/tutoring-mode:tutoring build --high`.
+
 ```
 /tutoring                              asks: "Are we exploring or building something today?"
 /tutoring --high | --medium | --low    asks the same, then uses that level for build
@@ -68,7 +70,7 @@ Explore mode is an **orchestrator–worker** multi-agent system. The skill, runn
 
 ```mermaid
 flowchart LR
-    User(["You: /tutoring explore …"]) --> Orch["Orchestrator<br/>(tutoring-mode skill)"]
+    User(["You: /tutoring explore …"]) --> Orch["Orchestrator<br/>(tutoring skill)"]
     Orch -->|"scope"| Exp1["codebase-explorer<br/>area 1"]
     Orch -->|"scope"| Exp2["codebase-explorer<br/>area 2"]
     Exp1 -->|"map"| Merge["Merge maps"]
@@ -98,7 +100,7 @@ Design choices:
   - *Right model per job* — simple diagram agents (component, ER, state) run on Haiku; class, sequence, and activity diagrams and the explorer run on Sonnet; the main session does the checking and teaching. Every diagram agent ends with a completeness checklist, so nothing in its map slice is dropped silently.
   - *Skeleton first* — large repos get a cheap outline (components, entry points, imports) and only the parts you pick are mapped in depth; tours go deep one unit at a time.
   - *Incremental updates* — a saved map remembers its commit; next time, `git diff` decides which areas to re-read, and unchanged code is never explored again.
-  - *Only what's needed* — each diagram agent gets just its slice of the map, diagrams that can't apply (no database → no ER) are never started, and agents have tool-call budgets.
+  - *Only what's needed* — each diagram agent gets just its slice of the map (read from the saved map when it's in your project, so the main session doesn't retype it), diagrams that can't apply (no database → no ER) are never started, and agents have tool-call budgets.
   - *Verify against the map, not the code* — diagrams cite map IDs, so checking them needs no file reading; the map itself is spot-checked against the code once.
   - Build mode keeps its conversation small: it reuses the explore map, hands searching to the `code-locator` agent, lets tests and linters check code, and compacts between subtasks.
 - **Graceful fallback.** Where subagents aren't available (Claude.ai), the skill runs the same steps itself, one after another.
@@ -109,7 +111,7 @@ Design choices:
 .claude-plugin/
   plugin.json                       plugin manifest
   marketplace.json                  lets Claude Code install the plugin from this repo
-skills/tutoring-mode/
+skills/tutoring/
   SKILL.md                          commands, mode selection, shared rules
   references/
     teaching-style.md               "explain like I'm 12", matching the user, always say where things are
@@ -125,6 +127,9 @@ agents/
   diagram-component.md · diagram-class.md · diagram-sequence.md
   diagram-activity.md · diagram-er.md · diagram-state.md   (component/er/state: haiku; class/sequence/activity: sonnet)
   code-locator.md                   build mode: finds file:line locations (haiku)
+evals/
+  check.mjs                         free structural checks and token budgets
+  <case>/                           test cases for claude plugin eval (real, billed runs)
 ```
 
 ## Installing
@@ -136,18 +141,20 @@ agents/
 /plugin install tutoring-mode@engracia-tutoring
 ```
 
+Then start it with `/tutoring-mode:tutoring`. Plugin commands always include the plugin's name, so a plain `/tutoring` needs the manual install below.
+
 ### Claude Code — manually
 
 Copy the skill and the agents into your Claude folder — `~/.claude/` for all projects, or `.claude/` in a project root for that project only:
 
-- `skills/tutoring-mode/` → `~/.claude/skills/tutoring-mode/`
+- `skills/tutoring/` → `~/.claude/skills/tutoring/`
 - `agents/*.md` → `~/.claude/agents/`
 
 Build mode works with just the skill (`code-locator` is optional and keeps sessions cheaper). Explore mode needs the agents for the multi-agent version; without them it uses the fallback.
 
 ### Claude.ai (web/desktop/mobile)
 
-1. Zip the `skills/tutoring-mode/` folder.
+1. Zip the `skills/tutoring/` folder.
 2. In Claude.ai, go to **Customize → Skills → "+ Create skill" → Upload a skill** and upload the zip.
 3. Toggle it on.
 
