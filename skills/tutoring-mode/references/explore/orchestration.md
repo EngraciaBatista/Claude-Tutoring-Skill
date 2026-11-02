@@ -5,7 +5,7 @@ In explore mode, Claude (running this skill in the main session) is the **orches
 ```
 orchestrator (this skill)
   │ 1. scope            → ask what to focus on
-  │ 2. map             → reuse / update, or codebase-explorer  (skeleton first for big repos)
+  │ 2. map             → reuse / update, or codebase-explorer  (skeleton first for big repos), then auto-save
   │ 3. diagrams        → diagram-component | -class | -sequence | -activity | -er | -state  (in parallel)
   │ 4. verify          → spot-check locations, check Mermaid syntax
   │ 5. present         → chat first
@@ -18,7 +18,8 @@ Subagents can't launch other subagents, which is why the orchestrator is this sk
 
 - Never edit, create, or delete the user's source files in explore mode.
 - All subagents are read-only (Read, Grep, Glob at most; most diagram agents only have Read).
-- The only writes ever allowed are in step 6, inside `.tutoring/explore/` (and `.gitignore`, if the user agrees), after the user says yes.
+- The only writes ever allowed in the project are in step 6, inside `.tutoring/explore/` (and `.gitignore`, if the user agrees), after the user says yes, and `.tutoring/progress.md` for tours, once the user agrees to it.
+- The one write outside the project is the map auto-save in step 2. It never touches the project.
 - If the user asks for a code change during explore, say that explore is read-only and offer to switch to `/tutoring build`.
 
 ## 1. Scope
@@ -41,7 +42,7 @@ The map is the expensive step, and its cost grows with the codebase. The rules b
 - `report --low` and `diagram component` → a skeleton is enough.
 - `report --high`, `tour`, and `diagram class | sequence | activity | er | state` → the focus component(s) must be `deep`. If they're skeleton, dispatch a `deep` explorer for just those components (ask the user to pick from the skeleton's component list if there's no focus yet), merge it in, and then continue. For `er` and `state` with no focus, go deep on the components most likely to hold them (models, entities, schema, workflow/status code) and say that's what you did.
 
-**Reuse or update — don't redo.** Check for an existing map for the same scope (from earlier in this session, or saved at `.tutoring/explore/map.md`) and compare its `Commit:` with the current hash:
+**Reuse or update — don't redo.** Check for an existing map that covers this scope, in this order: earlier in this session, saved at `.tutoring/explore/map.md`, auto-saved at `~/.claude/tutoring/<repo folder name>/map.md`. Ignore an auto-saved map whose `Repository:` line isn't this project (another project can share a folder name). Compare its `Commit:` with the current hash:
 - **Same** → reuse it as is.
 - **Different** → run `git diff --name-only <map commit> HEAD`, keeping only source files in scope:
   - none of the changed files are in scope → reuse the map and say it's still current for this scope;
@@ -67,6 +68,8 @@ The map is the expensive step, and its cost grows with the codebase. The rules b
 4. Keep all `Unverified` items.
 
 Tell the user briefly what's happening while agents run ("Mapping the code in 3 parts at the same time: api, web, workers…").
+
+**Auto-save the map.** The map is the most expensive thing explore makes, so don't let it depend on the save question in step 6. Whenever a map is created or changed (after the check in step 4.0–4.1), write it to `~/.claude/tutoring/<repo folder name>/map.md`, without asking. If that file already holds other parts of this project, merge the new parts in (rules above) instead of replacing it. Tell the user once, in one line: "I saved the code map outside your project, at `<path>`, so later sessions can reuse it." If the write fails or is refused, say so once and carry on.
 
 ## 3. Diagrams
 

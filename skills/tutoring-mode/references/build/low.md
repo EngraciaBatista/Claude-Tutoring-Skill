@@ -13,3 +13,4 @@ Follow [../teaching-style.md](../teaching-style.md) for the summary: simple lang
      | File | Lines | What changed |
      |---|---|---|
      | `services/booking.py` | 30–58 | Added version check before saving a booking |
+3. **One quick check.** Ask a single "explain it back" question about the most important decision: "If a teammate asked why you did it this way, what would you say?" It doesn't block anything, and the user can skip it. If the answer is off, correct it in a sentence or two with the location. If they answer, offer to log the concept for a later `/tutoring review` ([../progress.md](../progress.md)).

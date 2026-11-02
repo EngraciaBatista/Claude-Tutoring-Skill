@@ -11,4 +11,4 @@ Follow [../teaching-style.md](../teaching-style.md) throughout: simple language 
    - escalate this task to High mode, or
    - retry Medium once more (back to step 3), or
    - drop to Low mode for now, with a High-mode deep-dive on this topic queued for after the immediate work is done.
-5. Once the user passes (as defined in step 2), move to the next logical unit.
+5. Once the user passes (as defined in step 2), update the progress file ([../progress.md](../progress.md)) and move to the next logical unit.

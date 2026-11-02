@@ -56,7 +56,7 @@ Present it and ask the user to confirm or change it before starting. Show the up
 - Give hints that point in the right direction before giving answers.
 - **Cap: 3 attempts.** After 3 wrong/incomplete attempts on the same subtask, show the correct solution directly, explain every line, and point out what was different from their attempt. Then move on.
 
-**e. Tick it off.** Mark the subtask done on the checklist and show what's left. If the session is getting long, this is the moment to suggest `/compact`.
+**e. Tick it off.** Mark the subtask done on the checklist, show what's left, and update the progress file ([../progress.md](../progress.md)). If the session is getting long, this is the moment to suggest `/compact`.
 
 ## 5. Summary
 
