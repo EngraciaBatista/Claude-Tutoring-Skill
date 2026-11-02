@@ -1,20 +1,22 @@
 ---
-name: tutoring-mode
-description: Structured tutoring for coding sessions, triggered explicitly with /tutoring. Two modes — "build" (learn by building something new, at --high, --medium, or --low depth) and "explore" (learn an existing codebase, read-only, through a report, UML diagrams, or a guided tour). Use this skill whenever the user invokes /tutoring, /tutoring build, or /tutoring explore — it governs how Claude explains, where it points the user in the code, how it checks understanding, and, in explore mode, how it orchestrates the codebase-explorer and diagram subagents.
+name: tutoring
+description: Structured tutoring for coding sessions, triggered explicitly with /tutoring. Four modes — "build" (learn by building something new, at --high, --medium, or --low depth), "explore" (learn an existing codebase, read-only, through a report, UML diagrams, or a guided tour), "review" (spaced quizzes on earlier work), and "drill" (defend the work to a sceptical teammate) — plus "resume" to pick up an unfinished session. Use this skill whenever the user invokes /tutoring or any of its sub-commands — it governs how Claude explains, where it points the user in the code, how it checks understanding, and, in explore mode, how it orchestrates the codebase-explorer and diagram subagents.
 ---
 
 # Tutoring Mode
 
 A structured skill for coding sessions where the user wants to build real understanding — not just receive working code or a wall of text. Built for situations where the user needs to explain and defend their work live (e.g. daily standups, project demos), or get up to speed on a codebase they didn't write.
 
-Two modes, both of them tutoring:
+Four modes, all of them tutoring:
 
 - **Build** — learn by *making* something new. Claude teaches while the work gets done.
 - **Explore** — learn by *understanding* something that already exists. Strictly read-only: Claude never changes the user's code in this mode.
+- **Review** — keep it. Spaced quizzes on what was learned in earlier sessions.
+- **Drill** — practice saying it out loud. Claude plays a sceptical teammate and the user defends the work.
 
 ## Activation
 
-This skill only activates when explicitly invoked with `/tutoring`. Never enter tutoring mode without it.
+This skill only activates when explicitly invoked with `/tutoring`. Never enter tutoring mode without it. Installed as a plugin, the same command is `/tutoring-mode:tutoring`: everything after it works exactly the same as in the table below.
 
 | The user types | Do this |
 |---|---|
@@ -26,6 +28,9 @@ This skill only activates when explicitly invoked with `/tutoring`. Never enter 
 | `/tutoring explore report --high` / `--low` | Explore report. No level given → ask "Full report or short overview?" |
 | `/tutoring explore diagram <type>` | Explore diagram. Types: `component`, `class`, `sequence`, `activity`, `er`, `state`, `all`. No type given → list the types with one line each and ask. |
 | `/tutoring explore tour --high` / `--medium` | Explore tour. No level given → **Medium**. |
+| `/tutoring resume` | Pick up the unfinished session. Follow [references/progress.md](references/progress.md). |
+| `/tutoring review` | Quiz the concepts that are due. A topic after it reviews that topic instead. Follow [references/review.md](references/review.md). |
+| `/tutoring drill --standup` / `--demo` | Sceptical-teammate practice. No flag → `--standup`. Follow [references/drill.md](references/drill.md). |
 | A level the sub-command doesn't have (`explore report --medium`, `explore tour --low`, a level on `explore diagram`) | Don't pick one silently. Say which levels exist for it and ask, e.g. "Reports come in `--high` (full) or `--low` (short) — which one?" For a diagram, say diagrams have no levels and continue. |
 
 Anything after the command that isn't a flag (e.g. `/tutoring explore diagram sequence checkout flow` or a path like `./backend`) is the **scope** — what part of the code to focus on. Without it, explore asks what to focus on (see the orchestration file).
@@ -36,6 +41,9 @@ Never silently switch modes or levels. Any change is either the user's explicit 
 
 1. **Teaching style** — follow [references/teaching-style.md](references/teaching-style.md) for every explanation: explain like the user is 12 (analogy → tiny example → real code), and always say *where* things are (`path/to/file.ext:line-range`). This is on by default; the user can ask to turn the simple style off.
 2. **CLAUDE.md** — if working in Claude Code on a project with a CLAUDE.md file, follow the conventions already loaded from it at session start (Claude Code auto-loads this — do not re-read the file, just apply its rules to whatever is built in this session). If there is no CLAUDE.md, skip this.
+3. **Calibration** — at the start of Build Medium, Build High, or a tour, ask how much the user already knows and adapt, as described in "Match the user" in [references/teaching-style.md](references/teaching-style.md). The user can also say "I know this" at any point to skip a concept.
+4. **Agent names** — installed as a plugin, agents are listed with a prefix: `codebase-explorer` is `tutoring-mode:codebase-explorer`, and so on. These files use the short names. When dispatching or checking whether an agent exists, use the name as it appears in the available agent types.
+5. **Progress** — before starting Build, a tour, Review, or Drill, read [references/progress.md](references/progress.md) and follow "At the start of a session". These modes keep `.tutoring/progress.md` once the user has agreed to it.
 
 ## Build mode
 
@@ -48,17 +56,17 @@ Read only the file for the level in use:
 **Every level — keep the session lean.** Build sessions get expensive by growing, since every turn re-reads the whole conversation. So:
 
 1. **Finding code (in this order):**
-   - **Use the explore map if it covers the area.** If `.tutoring/explore/map.md` exists, use its locations instead of searching — but only for components marked `depth: deep` that cover the area of this task. A skeleton part, or an area the map doesn't include, is only a hint about where to look: find the exact lines another way (below).
-     - Commit known → run `git diff --name-only <map commit> HEAD`; re-read only the changed files before quoting their lines.
-     - `Commit: unknown`, or the diff fails (not a git repo, rebased history) → you can't tell what changed, so treat every map location as a hint and re-check each line before quoting it.
+   - **Use the explore map if it covers the area.** Look for a map as described in [references/map-reuse.md](references/map-reuse.md). Use its locations instead of searching — but only for components marked `depth: deep` that cover the area of this task. A skeleton part, or an area the map doesn't include, is only a hint about where to look: find the exact lines another way (below).
+     - Check each of those components ("Is a component still current?" in that file), and re-read only the changed files before quoting their lines.
+     - If you can't tell what changed, treat that component's locations as hints and re-check each line before quoting it.
    - **Otherwise send `code-locator`** (if installed) with the question ("where is login handled?", "where would a new endpoint go?") and any map locations you have. It returns file:line locations only, so the search itself never enters this conversation.
    - **Otherwise search narrowly yourself:** Grep first, then read only the line ranges you need.
 2. **Let tools check the code.** After the user writes code (High) or after each unit (Medium), run the project's relevant tests and linter if it has them, and review with their results instead of reasoning through every line by hand.
-3. **Compact at boundaries.** Keep the subtask/unit checklist as the running state. When a session gets long, suggest `/compact` (Claude Code) at a subtask or unit boundary — never mid-explanation — and carry the checklist and the files touched forward.
+3. **Compact at boundaries.** Keep the subtask/unit checklist as the running state (in `.tutoring/progress.md` too, if the user agreed to it). When a session gets long, suggest `/compact` (Claude Code) at a subtask or unit boundary — never mid-explanation — and carry the checklist and the files touched forward.
 
 ## Explore mode
 
-Explore never edits, creates, or deletes the user's source files. The only thing it may ever write is the saved report in `.tutoring/explore/`, and only after the user says yes.
+Explore never edits, creates, or deletes the user's source files. Inside the project, the only things it may ever write are the saved results in `.tutoring/explore/` and, for tours, `.tutoring/progress.md`, each only after the user says yes. Outside the project, it auto-saves the codebase map to `~/.claude/tutoring/` ([references/map-reuse.md](references/map-reuse.md)), so that expensive work isn't lost.
 
 1. Read [references/explore/orchestration.md](references/explore/orchestration.md) first — it covers scoping, which subagents to run, how to merge and verify their output, diagrams, and saving.
 2. Then, for the sub-command:
@@ -67,7 +75,7 @@ Explore never edits, creates, or deletes the user's source files. The only thing
    - **tour** — also read [references/explore/tour.md](references/explore/tour.md)
 3. **Use the fallback** — follow [references/explore/fallback.md](references/explore/fallback.md) instead of dispatching agents — when either:
    - there is no Agent/Task tool to launch subagents (e.g. Claude.ai), or
-   - the agents aren't installed: `codebase-explorer` and the `diagram-*` agents don't appear in the available agent types, or a dispatch fails because the agent type is unknown (e.g. only the skill folder was copied). Tell the user once that the agents weren't found and explore will run without them.
+   - the agents aren't installed: `codebase-explorer` and the `diagram-*` agents don't appear in the available agent types under either name (see "Agent names" above), or a dispatch fails because the agent type is unknown (e.g. only the skill folder was copied). Tell the user once that the agents weren't found and explore will run without them.
 
 ## Escalation
 

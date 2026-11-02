@@ -2,18 +2,25 @@
 
 A Claude skill that turns Claude into a structured coding tutor instead of a code generator — built for anyone who needs to actually *understand* the code they work with, not just ship it. Useful if you have to explain or demo your code live (team standups, college project demos), if you're learning to code while working on real tasks, or if you've just joined a project and need to understand code someone else wrote.
 
-Two modes, both tutoring:
+Four modes, all tutoring:
 
 - **Build** — learn by *making* something new. Claude teaches while the work gets done.
 - **Explore** — learn by *understanding* something that already exists. Read-only: reports, UML diagrams, and guided tours of a codebase, produced by a team of specialist agents.
+- **Review** — keep it. Spaced quizzes on what you learned in earlier sessions.
+- **Drill** — practice saying it out loud. Claude plays a sceptical teammate and you defend the work.
 
-Every explanation, in every mode, is written **like you're 12** (analogy → small example → the real code) and always tells you **where things are** — file and line range, not just a function name.
+Explanations start **like you're 12** (analogy → small example → the real code) and adapt to what you already know, and they always tell you **where things are** — file and line range, not just a function name. Say "I know this" at any point to skip a concept.
 
 ## Commands
+
+This README writes every command as `/tutoring`, which is what you type after a manual install. **After a plugin install, type `/tutoring-mode:tutoring` instead**, for example `/tutoring-mode:tutoring build --high`.
 
 ```
 /tutoring                              asks: "Are we exploring or building something today?"
 /tutoring --high | --medium | --low    asks the same, then uses that level for build
+/tutoring resume                       picks up your unfinished build or tour
+/tutoring review [topic]               quizzes you on what's due, or on one topic
+/tutoring drill --standup | --demo     a sceptical teammate questions your work
 ```
 
 ### Build
@@ -22,7 +29,7 @@ Every explanation, in every mode, is written **like you're 12** (analogy → sma
 |---|---|
 | `/tutoring build --high` | **You build it.** Claude explains the problem, offers 2–3 possible solutions, breaks the chosen one into a checklist of subtasks, then for each subtask: a lesson, a quick check, **you write the code** (Claude can give you a skeleton with TODOs), and a review — max 3 attempts before Claude shows the answer. |
 | `/tutoring build --medium` (default) | **Claude builds, you're quizzed.** Claude codes and explains one logical unit at a time, then quizzes you (max 3 questions) before moving on. |
-| `/tutoring build --low` | **Claude builds fast, you get the recap.** Full solution first, then a short spoken-form summary (for saying out loud in a standup), a full write-up with references, and a table of every file and line range touched. |
+| `/tutoring build --low` | **Claude builds fast, you get the recap.** Full solution first, then a short spoken-form summary (for saying out loud in a standup), a full write-up with references, a table of every file and line range touched, and one optional "explain it back" question. |
 
 ### Explore (read-only)
 
@@ -39,7 +46,15 @@ Every explanation, in every mode, is written **like you're 12** (analogy → sma
 
 Add a focus after any explore command — a folder, a feature, or a flow: `/tutoring explore diagram sequence checkout flow`.
 
-Results show in chat first. Claude then offers to save them to `.tutoring/explore/` in your project — and asks first whether to add `.tutoring/` to `.gitignore`. Explore never changes your code.
+Results show in chat first. Claude then offers to save them to `.tutoring/explore/` in your project — and asks first whether to add `.tutoring/` to `.gitignore`. Explore never changes your code. The codebase map is the one exception to asking: it's auto-saved outside your project, to `~/.claude/tutoring/<project key>/map.md`, so later sessions can reuse it. If you've also saved it to your project, both copies are kept up to date.
+
+### Resume, review, and drill
+
+If you agree, build sessions and tours keep your progress in `.tutoring/progress.md`:
+
+- **`/tutoring resume`** picks up from the exact step where you stopped.
+- **`/tutoring review`** brings back what you learned on a spaced schedule (3, 7, 21, then 60 days). Each round is at most 5 concepts: recall it first, then find it in the code. A wrong answer goes back to 3 days, and reviewing early doesn't move a concept along.
+- **`/tutoring drill`** has no pass mark. You give your update, a sceptical teammate asks follow-ups based on the real code (2–3 for `--standup`, 4–5 for `--demo`), and then you get feedback and a better version of your opening. Shaky answers join your review list.
 
 ### Viewing the diagrams
 
@@ -55,7 +70,7 @@ Explore mode is an **orchestrator–worker** multi-agent system. The skill, runn
 
 ```mermaid
 flowchart LR
-    User(["You: /tutoring explore …"]) --> Orch["Orchestrator<br/>(tutoring-mode skill)"]
+    User(["You: /tutoring explore …"]) --> Orch["Orchestrator<br/>(tutoring skill)"]
     Orch -->|"scope"| Exp1["codebase-explorer<br/>area 1"]
     Orch -->|"scope"| Exp2["codebase-explorer<br/>area 2"]
     Exp1 -->|"map"| Merge["Merge maps"]
@@ -80,12 +95,12 @@ Design choices:
 - **Read the code once.** One explorer (or several in parallel, one per area of a large repo) builds a structured **map** where every item has a verified `path:line`. The diagram agents work from that map instead of each re-reading the codebase — cheaper, faster, and every diagram tells the same story.
 - **One specialist per diagram type.** Each diagram agent has a short, focused prompt with the rules for its own UML type and Mermaid syntax, so diagrams break less often. They run in parallel.
 - **Traceable by design.** Every box and arrow must link to real code. The orchestrator spot-checks locations and validates the Mermaid before showing anything; anything unconfirmed is labeled *unverified*, not drawn as fact.
-- **Least privilege.** All subagents are read-only (`Read`, `Grep`, `Glob`). Only the orchestrator can write, and only to `.tutoring/explore/` after you say yes.
+- **Least privilege.** All subagents are read-only (`Read`, `Grep`, `Glob`). Only the orchestrator can write: to `.tutoring/` after you say yes, and the map auto-save outside your project.
 - **Cost-aware by design.** Big codebases get expensive fast, so explore avoids paying twice or reading more than needed:
   - *Right model per job* — simple diagram agents (component, ER, state) run on Haiku; class, sequence, and activity diagrams and the explorer run on Sonnet; the main session does the checking and teaching. Every diagram agent ends with a completeness checklist, so nothing in its map slice is dropped silently.
   - *Skeleton first* — large repos get a cheap outline (components, entry points, imports) and only the parts you pick are mapped in depth; tours go deep one unit at a time.
-  - *Incremental updates* — a saved map remembers its commit; next time, `git diff` decides which areas to re-read, and unchanged code is never explored again.
-  - *Only what's needed* — each diagram agent gets just its slice of the map, diagrams that can't apply (no database → no ER) are never started, and agents have tool-call budgets.
+  - *Incremental updates* — each part of a saved map remembers its own commit and any uncommitted files; next time, `git diff` decides which parts to re-read, and unchanged code is never explored again.
+  - *Only what's needed* — each diagram agent gets just its slice of the map (read from the saved map when it's in your project, so the main session doesn't retype it), diagrams that can't apply (no database → no ER) are never started, and agents have tool-call budgets.
   - *Verify against the map, not the code* — diagrams cite map IDs, so checking them needs no file reading; the map itself is spot-checked against the code once.
   - Build mode keeps its conversation small: it reuses the explore map, hands searching to the `code-locator` agent, lets tests and linters check code, and compacts between subtasks.
 - **Graceful fallback.** Where subagents aren't available (Claude.ai), the skill runs the same steps itself, one after another.
@@ -96,10 +111,14 @@ Design choices:
 .claude-plugin/
   plugin.json                       plugin manifest
   marketplace.json                  lets Claude Code install the plugin from this repo
-skills/tutoring-mode/
+skills/tutoring/
   SKILL.md                          commands, mode selection, shared rules
   references/
-    teaching-style.md               "explain like I'm 12" + always say where things are
+    teaching-style.md               "explain like I'm 12", matching the user, always say where things are
+    progress.md                     the progress file and /tutoring resume
+    map-reuse.md                    where maps live and how to tell if they're still current
+    review.md                       spaced review quizzes
+    drill.md                        sceptical-teammate practice
     build/high.md · medium.md · low.md
     explore/orchestration.md        how the agents are dispatched, merged, verified, saved
     explore/report.md · tour.md
@@ -109,6 +128,9 @@ agents/
   diagram-component.md · diagram-class.md · diagram-sequence.md
   diagram-activity.md · diagram-er.md · diagram-state.md   (component/er/state: haiku; class/sequence/activity: sonnet)
   code-locator.md                   build mode: finds file:line locations (haiku)
+evals/
+  check.mjs                         free structural checks and token budgets
+  <case>/                           test cases for claude plugin eval (real, billed runs)
 ```
 
 ## Installing
@@ -120,18 +142,20 @@ agents/
 /plugin install tutoring-mode@engracia-tutoring
 ```
 
+Then start it with `/tutoring-mode:tutoring`. Plugin commands always include the plugin's name, so a plain `/tutoring` needs the manual install below.
+
 ### Claude Code — manually
 
 Copy the skill and the agents into your Claude folder — `~/.claude/` for all projects, or `.claude/` in a project root for that project only:
 
-- `skills/tutoring-mode/` → `~/.claude/skills/tutoring-mode/`
+- `skills/tutoring/` → `~/.claude/skills/tutoring/`
 - `agents/*.md` → `~/.claude/agents/`
 
 Build mode works with just the skill (`code-locator` is optional and keeps sessions cheaper). Explore mode needs the agents for the multi-agent version; without them it uses the fallback.
 
 ### Claude.ai (web/desktop/mobile)
 
-1. Zip the `skills/tutoring-mode/` folder.
+1. Zip the `skills/tutoring/` folder.
 2. In Claude.ai, go to **Customize → Skills → "+ Create skill" → Upload a skill** and upload the zip.
 3. Toggle it on.
 

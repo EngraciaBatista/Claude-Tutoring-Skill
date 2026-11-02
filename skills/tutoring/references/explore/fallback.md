@@ -13,13 +13,14 @@ Work with whatever the user has given access to: uploaded files or a zip, pasted
 1. **Scope** — same as orchestration step 1.
 2. **Map** — explore the code and write the map yourself, using this structure (every item with a real `path:line`, inferences under Unverified):
    ```
-   Overview · Entry points (E*) · Components (C*, with depends-on + evidence)
+   Header: Repository (project root), Scope, Depth (deep | skeleton | mixed), Updated
+   Overview · Entry points (E*) · Components (C*, with depends-on + evidence, depth, commit, dirty)
    Key classes and functions (K*: purpose, fields, methods, relations + evidence)
    Flows (F*: numbered call-by-call steps with locations and branches)
    Data model (D*: fields, keys, relations) · State machines (S*: states, transitions)
    External dependencies (X*) · Reading guide (5 files) · Unverified
    ```
-   Read efficiently: search for definitions before opening files, read line ranges rather than whole files, and skip dependencies, build output, generated code, lockfiles, and tests. For a large codebase, make an outline first (components and entry points only), let the user pick where to go deep, and map one area at a time.
+   Read efficiently: search for definitions before opening files, read line ranges rather than whole files, and skip dependencies, build output, generated code, lockfiles, and tests. For a large codebase, make an outline first (components and entry points only), let the user pick where to go deep, and map one area at a time. The header and each component's `depth:`, `commit:`, and `dirty:` are what let a later session reuse the map, so fill them in as [../map-reuse.md](../map-reuse.md) describes (`commit: unknown` if you can't run git). If you can write to a home folder, auto-save the map as that file describes; if not (e.g. Claude.ai), skip this and offer it in step 6.
 3. **Diagrams** — draw each needed diagram one at a time (same "which diagrams" table as orchestration step 3), in Mermaid:
 
    - **component** — `flowchart LR`. At most 15 nodes; components as boxes `Id["…"]`, databases `Id[("…")]`, outside services `Id(["…"])`; arrows mean "uses", with 1–3 word labels: `A -->|"calls"| B`.

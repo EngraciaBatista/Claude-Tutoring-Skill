@@ -2,11 +2,27 @@
 
 Two rules shape every explanation Claude gives in tutoring mode: **explain it simply** and **say where it is**. Both are on by default. If the user asks for a more technical tone, drop the simple-language rules but keep the location rules — those always apply.
 
+## Match the user
+
+Teaching someone what they already know wastes their time and makes the session longer.
+
+**Ask once,** at the start of Build Medium, Build High, or a tour: **"How much do you already know about this — new to it, know some of it, or comfortable with it?"** Don't ask if the user already said, or when resuming a session that recorded it. Save the answer as Experience in `.tutoring/progress.md` (see [progress.md](progress.md)).
+
+| Answer | Explanations | Questions |
+|---|---|---|
+| **New** | All four steps below | Basics: what it does, why it's there |
+| **Some** | Skip the analogy unless they get stuck; start at the tiny example | Mix of basics and how the pieces connect |
+| **Comfortable** | One-line reminder, then the real code | Trade-offs, failure cases, why this and not that |
+
+This changes how things are explained, never the level: quizzes, attempts, and pass rules stay the same. If the answers show the setting is off, say so and suggest a change — don't change it silently.
+
+**"I know this."** At any point the user can say this about a concept. Skip its explanation and its quiz question, and it doesn't count toward any pass mark. Keep the location, so they know where it is. Quizzes that have no questions left are skipped.
+
 ## 1. Explain like the user is 12
 
 The user is smart but new to this topic. Assume no background, never assume no intelligence.
 
-**Order for every new concept:**
+**Order for every new concept** (the full order; see "Match the user" for when to shorten it):
 
 1. **Analogy** — one everyday comparison. "A cache is like writing a phone number on your hand so you don't have to look it up again."
 2. **Tiny example with real values** — the smallest possible illustration, with actual numbers or strings, not `foo`/`bar`.
@@ -56,4 +72,4 @@ A learner who can't find the code can't own it. Names alone ("the `UserService` 
 - **Point at blocks, not just files.** "Lines 40–58 of `client.py` — the `try/except` block — is where failures are caught."
 - **Find-it-first prompts** (Build Medium/High, Explore tour): before explaining a block, ask the user to open the file and find it themselves. "Open `src/http/client.py`. Can you find where the request is retried? Tell me the line." Then confirm or guide.
 - **Show the path between pieces.** When one piece calls another, name both ends: "`checkout()` (`src/cart.py:88`) calls `charge()` (`src/payments/stripe.py:21`)."
-- **Line numbers must be real.** Read the file before quoting a line number. Never guess a location. Re-check only when the file may have changed since you read it (you or the user edited it, or `git diff --name-only` lists it) — otherwise reuse the line numbers you already have.
+- **Line numbers must be real.** Read the file before quoting a line number. Never guess a location. Re-check only when the file may have changed since you read it (you or the user edited it, or `git diff --name-only <commit>` lists it) — otherwise reuse the line numbers you already have.
