@@ -1,6 +1,6 @@
 {
   "name": "tutoring-mode",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "Structured coding tutor for Claude: learn by building (High/Medium/Low), learn an existing codebase through reports, UML diagrams, and guided tours, then keep it with spaced reviews and sceptical-teammate drills.",
   "author": {
     "name": "Engracia Batista"

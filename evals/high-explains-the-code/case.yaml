@@ -1,0 +1,6 @@
+schema_version: "1.1"
+name: high-explains-the-code
+expected_outcome: |
+  Claude explains the code line by line for someone learning to program, with real values and no opening analogy or story.
+context:
+  scaffold_script: place-files.sh
