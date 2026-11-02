@@ -18,8 +18,8 @@ Subagents can't launch other subagents, which is why the orchestrator is this sk
 
 - Never edit, create, or delete the user's source files in explore mode.
 - All subagents are read-only (Read, Grep, Glob at most; most diagram agents only have Read).
-- The only writes ever allowed in the project are in step 6, inside `.tutoring/explore/` (and `.gitignore`, if the user agrees), after the user says yes, and `.tutoring/progress.md` for tours, once the user agrees to it.
-- The one write outside the project is the map auto-save in step 2. It never touches the project.
+- The only writes ever allowed in the project are in step 6, inside `.tutoring/explore/` (and `.gitignore`, if the user agrees), after the user says yes, and `.tutoring/progress.md` for tours, once the user agrees to it. Once the user has chosen to keep `.tutoring/explore/map.md`, it's kept up to date without asking again.
+- The one write outside the project is the map auto-save ([../map-reuse.md](../map-reuse.md)).
 - If the user asks for a code change during explore, say that explore is read-only and offer to switch to `/tutoring build`.
 
 ## 1. Scope
@@ -34,7 +34,9 @@ Subagents can't launch other subagents, which is why the orchestrator is this sk
 
 The map is the expensive step, and its cost grows with the codebase. The rules below are about not paying for the same reading twice and not reading more than the user needs.
 
-**Get the commit first.** Run `git rev-parse HEAD` in the target. If it works, pass that hash to every explorer in its prompt (they copy it into the map's `Commit:` line — they can't run git themselves). If it fails (not a git repo, or git isn't available), the commit is `unknown`.
+**Read [../map-reuse.md](../map-reuse.md).** It covers where maps live, what each component records, and how to tell whether a component is still current.
+
+**Get the commit first.** Run `git rev-parse HEAD` in the target. If it works, pass that hash to every explorer in its prompt (they copy it onto each component's `commit:` — they can't run git themselves). If it fails (not a git repo, or git isn't available), the commit is `unknown`. Right after an explorer returns, add each component's `dirty:` line yourself.
 
 **Map depth.** Every map records its `Depth:` (header) and a `depth:` per component. A **skeleton** part has no classes, flows, data model, or state machines — those sections say "Skipped (skeleton)", which means *not looked at yet*, never "doesn't exist". When maps are merged, the header becomes `Depth: mixed` and each component keeps its own `depth:`.
 
@@ -42,12 +44,11 @@ The map is the expensive step, and its cost grows with the codebase. The rules b
 - `report --low` and `diagram component` → a skeleton is enough.
 - `report --high`, `tour`, and `diagram class | sequence | activity | er | state` → the focus component(s) must be `deep`. If they're skeleton, dispatch a `deep` explorer for just those components (ask the user to pick from the skeleton's component list if there's no focus yet), merge it in, and then continue. For `er` and `state` with no focus, go deep on the components most likely to hold them (models, entities, schema, workflow/status code) and say that's what you did.
 
-**Reuse or update — don't redo.** Check for an existing map that covers this scope, in this order: earlier in this session, saved at `.tutoring/explore/map.md`, auto-saved at `~/.claude/tutoring/<repo folder name>/map.md`. Ignore an auto-saved map whose `Repository:` line isn't this project (another project can share a folder name). If the map's `Commit:` is known, run `git diff --name-only <map commit>` and `git ls-files -o --exclude-standard`, keeping only source files in scope. Do this even when the commit matches the current hash: without `HEAD` in the command, these also catch uncommitted edits and new files.
-- **Commit known:**
-  - none of the changed files are in scope → reuse the map and say it's still current for this scope;
-  - some are → tell the user which areas changed and offer an **update**: dispatch an explorer in `update` depth for each affected component, with its old map sections and its changed files, then patch those sections into the map (keep IDs stable, drop items listed as removed). Update the map's `Commit:` line;
-  - more than ~40% of the in-scope source files changed, or the diff fails (e.g. the old commit no longer exists after a rebase) → offer a full refresh instead.
-- **Either side `unknown`** → you can't tell if it's out of date. Say so and ask whether to reuse it or refresh. Don't call it outdated.
+**Reuse or update — don't redo.** Find an existing map that covers this scope, then check each component in scope, keeping only source files ("Is a component still current?" in [../map-reuse.md](../map-reuse.md)):
+- **All current** → reuse the map and say it's still current for this scope.
+- **Some have changed** → tell the user which areas changed and offer an **update**: dispatch an explorer in `update` depth for each affected component, with its old map sections and its changed files, then patch those sections into the map (keep IDs stable, drop items listed as removed). Update `commit:` and `dirty:` for those components only. Components out of scope keep theirs, so their changes are still caught later.
+- **More than ~40% of the in-scope source files changed** → offer a full refresh instead.
+- **You can't tell** (`commit: unknown`, or the diff failed) → say so and ask whether to reuse it or refresh. Don't call it outdated.
 
 **Size check.** Count the source files in scope with a quick command (e.g. `git ls-files` filtered by source extensions, or Glob), excluding dependencies, build output, vendored and generated code, lockfiles, and tests.
 
@@ -68,7 +69,7 @@ The map is the expensive step, and its cost grows with the codebase. The rules b
 
 Tell the user briefly what's happening while agents run ("Mapping the code in 3 parts at the same time: api, web, workers…").
 
-**Auto-save the map.** The map is the most expensive thing explore makes, so don't let it depend on the save question in step 6. Whenever a map is created or changed (after the check in step 4.0–4.1), write it to `~/.claude/tutoring/<repo folder name>/map.md`, without asking. If that file already holds other parts of this project, merge the new parts in (rules above) instead of replacing it. Tell the user once, in one line: "I saved the code map outside your project, at `<path>`, so later sessions can reuse it." If the write fails or is refused, say so once and carry on.
+**Auto-save the map.** Don't let the map depend on the save question in step 6. Whenever it's created or changed (after the checks in step 4.0–4.1), follow "Writing a map" in [../map-reuse.md](../map-reuse.md), before dispatching any diagram agents.
 
 ## 3. Diagrams
 
@@ -105,7 +106,7 @@ Tell the user in one line why each skipped diagram was skipped (e.g. "No ER diag
 
 **Dispatching:** launch all needed diagram agents **in one message** so they run in parallel. Each prompt contains:
 - **only the map sections that agent needs** (table above), given the cheapest way available. This session usually runs the most expensive model, and retyping sections into prompts costs more than a smaller agent reading a file:
-  - map saved at `.tutoring/explore/map.md` → give the path and the section names. Don't retype anything.
+  - map saved at `.tutoring/explore/map.md` and just brought up to date ("Writing a map" in [../map-reuse.md](../map-reuse.md)) → give the path and the section names. Don't retype anything. If that write failed, the file is behind the map you hold, so paste.
   - map not saved in the project, and 3 or more agents to run → first ask once: "Save the code map to `.tutoring/explore/` so the diagram helpers can read it? That's cheaper than copying it to each one." Yes → follow step 6 for this file (the `.gitignore` question comes first), then give the path. No → paste.
   - otherwise → paste the sections in.
   - Never point agents at the auto-saved map, or anything else outside the project: subagents can be refused permission to read there. If an agent returns `CANNOT READ MAP`, paste its sections and dispatch it again.
@@ -143,11 +144,11 @@ After presenting, ask once: **"Want me to save this to `.tutoring/explore/` in t
 
 If yes:
 1. **First, ask about `.gitignore`** — if the project is a git repo and `.tutoring/` isn't already ignored: "Should I add `.tutoring/` to `.gitignore` so these files don't get committed?" Do what they answer.
-2. If any of the report or diagram files below already exist, list them and confirm before overwriting. Never replace `map.md` with a smaller scope: merge the new parts into it (step 2).
+2. If any of the report or diagram files below already exist, list them and confirm before overwriting. Never replace `map.md` with a smaller scope: merge the new parts into it (step 2), keeping each component's own `commit:` and `dirty:`.
 3. Write:
    ```
    .tutoring/explore/
-     map.md                       ← the merged codebase map (with the Commit: line) — lets tours and later runs reuse it
+     map.md                       ← the merged codebase map — lets tours and later runs reuse it
      report.md                    ← for report --high (or report-short.md for --low)
      diagrams/<type>.md           ← one file per diagram, whole-project: Mermaid block + How to read it + Traceability
      diagrams/<type>-<focus>.md   ← the same, for a focused diagram, e.g. sequence-checkout-flow.md

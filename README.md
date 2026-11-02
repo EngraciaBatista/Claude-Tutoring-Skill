@@ -46,14 +46,14 @@ This README writes every command as `/tutoring`, which is what you type after a 
 
 Add a focus after any explore command — a folder, a feature, or a flow: `/tutoring explore diagram sequence checkout flow`.
 
-Results show in chat first. Claude then offers to save them to `.tutoring/explore/` in your project — and asks first whether to add `.tutoring/` to `.gitignore`. Explore never changes your code. The codebase map is the one exception to asking: it's auto-saved outside your project, to `~/.claude/tutoring/<repo folder name>/map.md`, so later sessions can reuse it.
+Results show in chat first. Claude then offers to save them to `.tutoring/explore/` in your project — and asks first whether to add `.tutoring/` to `.gitignore`. Explore never changes your code. The codebase map is the one exception to asking: it's auto-saved outside your project, to `~/.claude/tutoring/<project key>/map.md`, so later sessions can reuse it. If you've also saved it to your project, both copies are kept up to date.
 
 ### Resume, review, and drill
 
 If you agree, build sessions and tours keep your progress in `.tutoring/progress.md`:
 
 - **`/tutoring resume`** picks up from the exact step where you stopped.
-- **`/tutoring review`** brings back what you learned on a spaced schedule (3, 7, 21, then 60 days). Each round is at most 5 concepts: recall it first, then find it in the code. A wrong answer goes back to 3 days.
+- **`/tutoring review`** brings back what you learned on a spaced schedule (3, 7, 21, then 60 days). Each round is at most 5 concepts: recall it first, then find it in the code. A wrong answer goes back to 3 days, and reviewing early doesn't move a concept along.
 - **`/tutoring drill`** has no pass mark. You give your update, a sceptical teammate asks follow-ups based on the real code (2–3 for `--standup`, 4–5 for `--demo`), and then you get feedback and a better version of your opening. Shaky answers join your review list.
 
 ### Viewing the diagrams
@@ -99,7 +99,7 @@ Design choices:
 - **Cost-aware by design.** Big codebases get expensive fast, so explore avoids paying twice or reading more than needed:
   - *Right model per job* — simple diagram agents (component, ER, state) run on Haiku; class, sequence, and activity diagrams and the explorer run on Sonnet; the main session does the checking and teaching. Every diagram agent ends with a completeness checklist, so nothing in its map slice is dropped silently.
   - *Skeleton first* — large repos get a cheap outline (components, entry points, imports) and only the parts you pick are mapped in depth; tours go deep one unit at a time.
-  - *Incremental updates* — a saved map remembers its commit; next time, `git diff` decides which areas to re-read, and unchanged code is never explored again.
+  - *Incremental updates* — each part of a saved map remembers its own commit and any uncommitted files; next time, `git diff` decides which parts to re-read, and unchanged code is never explored again.
   - *Only what's needed* — each diagram agent gets just its slice of the map (read from the saved map when it's in your project, so the main session doesn't retype it), diagrams that can't apply (no database → no ER) are never started, and agents have tool-call budgets.
   - *Verify against the map, not the code* — diagrams cite map IDs, so checking them needs no file reading; the map itself is spot-checked against the code once.
   - Build mode keeps its conversation small: it reuses the explore map, hands searching to the `code-locator` agent, lets tests and linters check code, and compacts between subtasks.
@@ -116,6 +116,7 @@ skills/tutoring/
   references/
     teaching-style.md               "explain like I'm 12", matching the user, always say where things are
     progress.md                     the progress file and /tutoring resume
+    map-reuse.md                    where maps live and how to tell if they're still current
     review.md                       spaced review quizzes
     drill.md                        sceptical-teammate practice
     build/high.md · medium.md · low.md

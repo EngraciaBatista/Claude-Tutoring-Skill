@@ -33,4 +33,4 @@ Anything else after the command is the topic, e.g. `/tutoring drill --demo retry
 - **What was shaky** — each weak answer, what a strong answer would have included, and where that lives in the code.
 - **A better version** — their opening, rewritten the way they'd say it out loud.
 
-There's no pass mark. Offer one more round on the weakest answer. If the file exists, add each shaky concept to "Learned" (next review in 3 days, interval 3), or set it back to interval 3 if it's already there.
+There's no pass mark. Offer one more round on the weakest answer. If the file exists, add each shaky concept to "Learned" (next review in 3 days, interval 3, missed 1). If it's already there, set Interval to 3, Next review to today plus 3, and add 1 to Missed.

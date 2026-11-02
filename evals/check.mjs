@@ -10,16 +10,17 @@ const S = `${SKILL}/SKILL.md`;
 const STYLE = `${R}/teaching-style.md`;
 const PROG = `${R}/progress.md`;
 const ORCH = `${R}/explore/orchestration.md`;
+const MAP = `${R}/map-reuse.md`;
 
 const COMMANDS = {
-  'build low': { files: [S, STYLE, PROG, `${R}/build/low.md`], budget: 5750 },
-  'build medium': { files: [S, STYLE, PROG, `${R}/build/medium.md`], budget: 5800 },
-  'build high': { files: [S, STYLE, PROG, `${R}/build/high.md`], budget: 6600 },
-  'explore diagram': { files: [S, STYLE, ORCH], budget: 8800 },
-  'explore report': { files: [S, STYLE, ORCH, `${R}/explore/report.md`], budget: 9600 },
-  'explore tour': { files: [S, STYLE, PROG, ORCH, `${R}/explore/tour.md`], budget: 10950 },
-  review: { files: [S, STYLE, PROG, `${R}/review.md`], budget: 5900 },
-  drill: { files: [S, STYLE, PROG, `${R}/drill.md`], budget: 5950 },
+  'build low': { files: [S, STYLE, PROG, MAP, `${R}/build/low.md`], budget: 6900 },
+  'build medium': { files: [S, STYLE, PROG, MAP, `${R}/build/medium.md`], budget: 6950 },
+  'build high': { files: [S, STYLE, PROG, MAP, `${R}/build/high.md`], budget: 7800 },
+  'explore diagram': { files: [S, STYLE, MAP, ORCH], budget: 9650 },
+  'explore report': { files: [S, STYLE, MAP, ORCH, `${R}/explore/report.md`], budget: 10500 },
+  'explore tour': { files: [S, STYLE, PROG, MAP, ORCH, `${R}/explore/tour.md`], budget: 12100 },
+  review: { files: [S, STYLE, PROG, `${R}/review.md`], budget: 6200 },
+  drill: { files: [S, STYLE, PROG, `${R}/drill.md`], budget: 6200 },
 };
 
 const failures = [];
@@ -63,8 +64,9 @@ if (!read(ORCH).includes('CANNOT READ MAP')) failures.push('orchestration.md los
 // Every agent stays read-only
 const agents = fs.readdirSync('agents').map((f) => `agents/${f}`);
 for (const f of agents) {
-  const tools = read(f).match(/^tools: (.*)$/m)?.[1] ?? '';
-  if (/Write|Edit|Bash/.test(tools)) failures.push(`${f}: agents must stay read-only (tools: ${tools})`);
+  const tools = read(f).match(/^tools: (.*)$/m)?.[1];
+  if (tools === undefined) failures.push(`${f}: no tools line, so the agent would get every tool`);
+  else if (/Write|Edit|Bash/.test(tools)) failures.push(`${f}: agents must stay read-only (tools: ${tools})`);
 }
 
 // The diagram agents' shared rules stay identical. (diagram-activity's "Work from the map" and

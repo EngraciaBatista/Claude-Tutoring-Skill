@@ -6,10 +6,10 @@ Follow [teaching-style.md](teaching-style.md) throughout.
 
 ## Setup
 
-1. Read the "Learned" table in `.tutoring/progress.md` (format in [progress.md](progress.md)). If there's no file or the table is empty, say there's nothing to review yet and suggest a build or a tour.
+1. Read `.tutoring/progress.md` (format in [progress.md](progress.md)). If there's no file, or "Learned" and "Queued" are both empty, say there's nothing to review yet and suggest a build or a tour.
 2. Pick the concepts: those with a Next review on or before today, oldest first, at most 5. If the command named a topic, pick the concepts that match it, due or not.
 3. Nothing due and no topic → say when the next one is due and ask whether to review early.
-4. Before asking about a concept, read its location. If the code has moved, update the location. If it's gone, say so, drop the row, and move to the next concept.
+4. Before asking about a concept, read its location. If the code has moved, update the location. If you can't find it, it may only be gone from this branch, so never drop the row on your own. Say so and ask: quiz it anyway without the find-it step, skip it for now (the row stays as it is), or remove it.
 
 ## Each concept
 
@@ -23,9 +23,10 @@ Follow [teaching-style.md](teaching-style.md) throughout.
 
 Update each concept's row as soon as it's graded, so stopping early loses nothing:
 
-- **Right** → move Interval up one step (3 → 7 → 21 → 60; 60 stays at 60), and set Next review to today plus Interval.
-- **Wrong** → set Interval to 3, and Next review to today plus 3.
+- **Right, and it was due** → move Interval up one step (3 → 7 → 21 → 60; 60 stays at 60), and set Next review to today plus Interval.
+- **Right, but reviewed early** (Next review is still in the future) → leave the row as it is. Spacing is the point, so an early review never moves a concept along.
+- **Wrong, due or not** → set Interval to 3, Next review to today plus 3, and add 1 to Missed.
 
 ## Wrap-up
 
-Say how many stuck, which ones are coming back soon, and when the next review is due. If the same concept has come back wrong more than once, suggest a High build or a hands-on tour on that topic, as a suggestion only.
+Say how many stuck, which ones are coming back soon, and when the next review is due. List anything in "Queued" and offer to do it now. If a concept's Missed count is 2 or more, suggest a High build or a hands-on tour on that topic, as a suggestion only.

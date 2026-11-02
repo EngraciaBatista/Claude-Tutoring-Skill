@@ -6,7 +6,7 @@ Two rules shape every explanation Claude gives in tutoring mode: **explain it si
 
 Teaching someone what they already know wastes their time and makes the session longer.
 
-**Ask once,** at the start of Build Medium, Build High, or a tour: **"How much do you already know about this — new to it, know some of it, or comfortable with it?"** Don't ask if the user already said, or if `.tutoring/progress.md` records it for the same kind of work. Save the answer there (see [progress.md](progress.md)).
+**Ask once,** at the start of Build Medium, Build High, or a tour: **"How much do you already know about this — new to it, know some of it, or comfortable with it?"** Don't ask if the user already said, or when resuming a session that recorded it. Save the answer as Experience in `.tutoring/progress.md` (see [progress.md](progress.md)).
 
 | Answer | Explanations | Questions |
 |---|---|---|
